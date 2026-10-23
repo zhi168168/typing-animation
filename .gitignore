@@ -1,0 +1,11 @@
+node_modules/
+dist/
+work/
+*.log
+.env
+.env.local
+.env.production
+.env.production.local
+.env.*
+!.env.example
+.vercel/

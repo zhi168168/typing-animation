@@ -1,0 +1,43 @@
+:root {
+  font-family: Inter, system-ui, sans-serif;
+  color: #efedf5;
+  background: #111113;
+  color-scheme: dark;
+}
+body {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  line-height: 1.8;
+}
+a {
+  color: #c5b4f1;
+  text-underline-offset: 4px;
+}
+nav {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 56px;
+  font-size: 14px;
+}
+h1 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+h2 {
+  font-size: 20px;
+  margin-top: 32px;
+}
+p,
+li {
+  color: #b8b5c1;
+}
+small {
+  color: #9995a3;
+}
+footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #2b2930;
+}

@@ -1,0 +1,213 @@
+/* Static content remains readable when the editor cannot initialize. */
+html {
+  scroll-padding-top: 20px;
+  background: var(--bg, #111113);
+}
+body {
+  margin: 0;
+}
+.seo-intro,
+.seo-guide,
+.seo-noscript {
+  font-family: "DM Sans", Arial, sans-serif;
+  color: var(--text, #eeedf1);
+}
+.seo-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 28px 40px;
+  border-bottom: 1px solid var(--border, #2b2b30);
+  background: var(--bg, #111113);
+}
+.seo-intro > div {
+  max-width: 750px;
+}
+.seo-intro h1 {
+  font-size: clamp(24px, 2.8vw, 36px);
+  letter-spacing: -1.2px;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+.seo-intro p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--soft, #b0afb9);
+  margin: 0;
+}
+.seo-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px 22px;
+  max-width: 340px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+.seo-nav a:first-child {
+  color: var(--accent, #c8b7f5);
+}
+.seo-nav a:hover,
+.seo-footer a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.seo-guide {
+  max-width: 1120px;
+  padding: 32px 40px 0;
+  margin: 0 auto;
+}
+.seo-guide section {
+  padding: 40px 0;
+  border-bottom: 1px solid var(--border, #2b2b30);
+  scroll-margin-top: 24px;
+}
+.seo-guide h2 {
+  margin: 0 0 20px;
+  font-size: clamp(23px, 3vw, 30px);
+  line-height: 1.25;
+  letter-spacing: -0.7px;
+}
+.seo-guide h3 {
+  font-size: 17px;
+  line-height: 1.45;
+  margin: 0 0 10px;
+}
+.seo-guide p {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--soft, #b0afb9);
+  max-width: 850px;
+  margin: 0 0 18px;
+}
+.seo-guide .seo-eyebrow {
+  color: var(--accent, #c8b7f5);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+.seo-steps,
+.seo-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+  margin: 30px 0 0;
+}
+.seo-steps {
+  padding-left: 20px;
+  gap: 40px;
+}
+.seo-steps li {
+  padding-left: 5px;
+}
+.seo-steps li::marker {
+  color: var(--accent, #c8b7f5);
+  font-weight: 700;
+}
+.seo-table-wrap {
+  overflow-x: auto;
+  margin: 24px 0;
+}
+.seo-guide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+.seo-guide caption {
+  text-align: left;
+  color: var(--soft, #b0afb9);
+  font-size: 12px;
+  padding-bottom: 12px;
+}
+.seo-guide th,
+.seo-guide td {
+  padding: 16px 14px;
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border, #2b2b30);
+  vertical-align: top;
+}
+.seo-guide thead {
+  background: var(--surface, #202023);
+}
+.seo-guide td {
+  color: var(--soft, #b0afb9);
+}
+.seo-guide details {
+  border-top: 1px solid var(--border, #2b2b30);
+}
+.seo-guide summary {
+  cursor: pointer;
+  font-size: 15px;
+  padding: 20px 4px;
+  line-height: 1.5;
+}
+.seo-guide details p {
+  padding: 0 4px 8px;
+}
+.seo-footer {
+  padding: 32px 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 12px;
+  color: var(--soft, #b0afb9);
+}
+.seo-footer a {
+  color: var(--accent, #c8b7f5);
+}
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px;
+  background: #c8b7f5;
+  color: #111113;
+}
+.skip-link:focus {
+  top: 12px;
+}
+.seo-noscript {
+  padding: 24px 40px;
+}
+@media (max-width: 900px) {
+  .seo-intro {
+    padding: 24px;
+    gap: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .seo-nav {
+    max-width: none;
+    justify-content: flex-start;
+    flex-shrink: 1;
+  }
+}
+@media (max-width: 760px) {
+  .seo-intro {
+    padding: 24px 20px;
+  }
+  .seo-intro h1 {
+    letter-spacing: -0.7px;
+  }
+  .seo-guide {
+    padding: 10px 24px 0;
+  }
+  .seo-guide section {
+    padding: 32px 0;
+  }
+  .seo-steps,
+  .seo-features {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .seo-guide th,
+  .seo-guide td {
+    padding: 12px 8px;
+    overflow-wrap: anywhere;
+  }
+  .seo-footer {
+    flex-direction: column;
+  }
+}

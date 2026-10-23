@@ -1,0 +1,15 @@
+Browser video encoding uses @ffmpeg/ffmpeg 0.12.15 (MIT wrapper) and
+@ffmpeg/core 0.12.10 (GPL-2.0-or-later core, including enabled codecs).
+FFmpeg copyright belongs to the FFmpeg contributors and bundled libraries.
+
+GPL license: /FFMPEG-GPL-2.0.txt
+Wrapper and core build source, dependency revisions and build instructions:
+https://github.com/ffmpegwasm/ffmpeg.wasm
+Published package and release history:
+https://www.npmjs.com/package/@ffmpeg/core/v/0.12.10
+Upstream FFmpeg source:
+https://github.com/ffmpegwasm/FFmpeg
+
+The core is provided without warranty. Retain this notice and the license when
+redistributing the self-hosted encoder. Review upstream source and license
+requirements before redistributing modified builds.
