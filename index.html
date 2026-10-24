@@ -4,12 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#111113" />
-    <title>
-      Typing Animation Generator — MP4, WebM &amp; HTML | Typing Animation
-    </title>
+    <title>Typing Animation Generator | Typing Animation</title>
     <meta
       name="description"
-      content="Create typewriter effects with Typing Animation’s typing animation generator. Customize fonts, speed and cursors, then export MP4, transparent WebM, HTML or PNG."
+      content="Create videos with our typing animation generator. Customize fonts, speed and cursors. Sign in to download MP4, transparent WebM, HTML or PNG animations."
     />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta property="og:type" content="website" />
@@ -21,7 +19,7 @@
     />
     <meta
       property="og:description"
-      content="Turn your words into a typewriter animation. Style the text, fine-tune the timing and export MP4, WebM, HTML or PNG. No sign-up required."
+      content="Create videos with our typing animation generator. Customize fonts, speed and cursors. Sign in to download MP4, transparent WebM, HTML or PNG animations."
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
@@ -30,10 +28,18 @@
     />
     <meta
       name="twitter:description"
-      content="Create a typewriter effect with custom fonts, timing and cursors. Export MP4, transparent WebM, HTML or PNG."
+      content="Create videos with our typing animation generator. Customize fonts, speed and cursors. Sign in to download MP4, transparent WebM, HTML or PNG animations."
     />
     <!-- site-metadata -->
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      sizes="16x16 32x32 48x48 64x64"
+      href="/favicon.ico"
+    />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/fonts/fonts.css" />
     <link rel="stylesheet" href="/src/seo.css" />
     <script type="application/ld+json">
@@ -59,12 +65,19 @@
       }
     </script>
   </head>
-  <body>
+  <body class="landing-page">
     <a class="skip-link" href="/editor">Skip to the animation editor</a>
     <nav class="site-navigation" aria-label="Main navigation">
       <a class="site-wordmark" href="/" aria-label="Typing Animation home"
-        >Typing Animation<span aria-hidden="true" class="wordmark-cursor"></span
-      ></a>
+        ><img
+          class="brand-logo"
+          src="/logo.png"
+          width="32"
+          height="32"
+          alt="Typing Animation logo"
+          aria-hidden="true"
+        />Typing Animation</a
+      >
       <div class="site-links">
         <a href="#how-it-works">How it works</a>
         <a href="#export-formats">Export formats</a>
@@ -73,32 +86,18 @@
       <div id="session-root">
         <a class="account-nav-link" href="/account">Sign in</a>
       </div>
-      <a class="site-open" href="/editor"
-        >Open editor
-        <svg
-          aria-hidden="true"
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.7"
-        >
-          <path d="M5 12h14m-6-6 6 6-6 6" /></svg
-      ></a>
     </nav>
     <section class="seo-intro" aria-labelledby="page-title">
       <div>
-        <h1 id="page-title">Typing Animation <span>Generator</span></h1>
+        <h1 id="page-title">Typing Animation Generator</h1>
         <p>
-          Create a typewriter effect with Typing Animation’s typing animation
-          generator. Customize the font, speed and cursor, then export your
-          animation as MP4, WebM or HTML — or save a PNG frame.
+          Turn your words into animated videos. Customize fonts, timing, and
+          cursors, then export in your favorite format.
         </p>
       </div>
       <div class="hero-actions">
         <a class="hero-primary" href="/editor"
-          >Create an animation
+          >Create animation
           <svg
             aria-hidden="true"
             viewBox="0 0 24 24"
@@ -114,12 +113,16 @@
           >Explore templates</a
         >
       </div>
+      <div class="hero-formats" aria-label="Export formats">
+        <span>MP4</span><span>WebM</span><span>HTML</span><span>PNG</span>
+      </div>
     </section>
     <figure class="hero-demo" aria-label="Typing animation demo">
-      <div class="hero-demo-stage" id="hero-demo">
-        <span class="hero-demo-text">Make every word count.</span>
+      <div id="hero-demo">
+        <div class="hero-demo-stage">
+          <span class="hero-demo-text">Make every word count.</span>
+        </div>
       </div>
-      <figcaption>Typing animation preview</figcaption>
     </figure>
     <noscript
       ><p class="seo-noscript">
@@ -133,8 +136,8 @@
         <p>
           Typing Animation is a typing animation generator for video intros,
           social posts, presentations and animated text on the web. Start with
-          your own message or one of 24 editable templates. No account is
-          required.
+          your own message or one of 24 editable templates. Edit and preview
+          without an account; sign in to download.
         </p>
         <ol class="seo-steps">
           <li>
@@ -291,18 +294,31 @@
             Do I need an account, and where is my project saved?
           </summary>
           <p>
-            No account is required. Your project is automatically saved in this
-            browser. Download a JSON project file with Save project to keep a
-            backup or move to another browser. Clearing site data removes the
-            browser's saved project.
+            Editing and previewing do not require an account. Sign in to
+            download animations or project files. Your project is automatically
+            saved in this browser. Download a JSON project file with Save
+            project to keep a backup or move to another browser. Clearing site
+            data removes the browser's saved project.
           </p>
         </details>
       </section>
       <footer class="seo-footer">
         <a href="/editor">Open the typing animation generator ↑</a
         ><span
-          ><a href="/privacy.html">Privacy</a> ·
-          <a href="/terms.html">Terms</a> · Typing Animation</span
+          ><a href="/about.html">About</a> ·
+          <a href="/contact.html">Contact</a> ·
+          <a href="/privacy.html">Privacy</a> ·
+          <a href="/terms.html">Terms</a> ·
+          <a class="footer-brand" href="/"
+            ><img
+              class="brand-logo"
+              src="/logo.png"
+              width="20"
+              height="20"
+              alt="Typing Animation logo"
+              aria-hidden="true"
+            />Typing Animation</a
+          ></span
         >
       </footer>
     </div>

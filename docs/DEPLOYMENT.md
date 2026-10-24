@@ -10,7 +10,7 @@
 2. 从 GitHub 导入 `zhi168168/typing-animation`；如果看不到仓库，调整 Vercel 的 GitHub 仓库访问范围。
 3. Root Directory 保持项目根目录；Framework 选 **Vite**；Node.js 使用 **24.x**。
 4. Install Command：`pnpm install --frozen-lockfile`；Build：`pnpm build`；Output：`dist`。仓库已提供配置，不要改成只部署 `src` 或 `accounts`。
-5. 先添加 Production 环境变量 `SITE_URL=https://typing-animation.com`。其余账户变量可以稍后添加；未配置时网页和动画导出仍可用，登录会提示未配置。
+5. 先添加 Production 环境变量 `SITE_URL=https://typing-animation.com`。其余账户变量可以稍后添加；未配置时网页、编辑和预览仍可用，但下载会被拦截，登录会提示暂不可用。
 6. 点击 Deploy，完成后到 **Settings → Domains → Add Domain** 添加 `typing-animation.com`。
 7. 打开域名注册商的 DNS 管理，按 Vercel 当时显示的记录类型、名称、值填写；不要照搬其他项目的 IP。保留邮件 TXT/MX 记录。等待 Vercel 显示 Valid Configuration、HTTPS 正常。
 8. 如添加 `www.typing-animation.com`，设置它重定向到 `typing-animation.com`，以不带 www 的地址为准。

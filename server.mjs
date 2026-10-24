@@ -9,6 +9,7 @@ import { createRequire } from "node:module";
 import { accountConfig } from "./accounts/config.mjs";
 import { createAccounts } from "./accounts/auth.mjs";
 import { mountAccounts } from "./accounts/http.mjs";
+import { exportAccess } from "./accounts/export-access.mjs";
 const ffmpeg = createRequire(import.meta.url).resolve(
   "@ffmpeg-installer/win32-x64/ffmpeg.exe",
 );
@@ -56,6 +57,7 @@ app.get(/^\/editor(?:\/|\.html)$/, (req, res) => {
     `/editor${req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : ""}`,
   );
 });
+app.use("/api/exports", exportAccess(accountService, jobs));
 app.use(express.json({ limit: "1mb" }));
 app.post("/api/exports", async (req, res) => {
   const { fps, format, width, height, frames, transparent } = req.body;
@@ -76,6 +78,7 @@ app.post("/api/exports", async (req, res) => {
   await mkdir(dir, { recursive: true });
   jobs.set(id, {
     id,
+    userId: req.exportUserId,
     dir,
     fps,
     format,

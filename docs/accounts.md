@@ -1,6 +1,6 @@
 # Typing Animation accounts
 
-Adapt the inspected Compresser PDF flow to Typing Animation: English email registration with confirmation, sign-in, verification resend, password reset, Google OAuth when configured, persistent sessions, profile/name editing, password change, sign-out and email-confirmed deletion. Accounts remain optional for animation creation and exports. Editing state stays in existing browser storage through account redirects.
+Adapt the inspected Compresser PDF flow to Typing Animation: English email registration with confirmation, sign-in, verification resend, password reset, Google OAuth when configured, persistent sessions, profile/name editing, password change, sign-out and email-confirmed deletion. Creating and previewing animations is available to guests; all downloads require a valid signed-in session. Editing state stays in existing browser storage through account redirects.
 
 ## Interface direction
 
@@ -28,7 +28,7 @@ Use Node.js 24. Vercel deployment now has a dedicated account Function; follow [
 
 Leave `AUTH_DEV_MODE` unset/false and do not copy `.env.local` to a public deployment. Public migrations are explicit; follow the deployment guide to migrate the new database. Static-only hosting does not provide these account APIs. On Vercel, the included account Function provides authentication and the browser encoder provides MP4/WebM; no persistent video backend is needed there.
 
-The server enables only configured providers. Account passwords are hashed by Better Auth; session cookies are HTTP-only and secure on HTTPS. Sessions expire after seven days. Verification is required for email/password sign-in, reset tokens expire and are single-use, and password reset revokes existing sessions. Deletion requires typed confirmation in the UI, an active session and an emailed token that expires after one hour. It removes the user and linked account/session records while keeping the local animation project. No export login gate has been added.
+The server enables only configured providers. Account passwords are hashed by Better Auth; session cookies are HTTP-only and secure on HTTPS. Sessions expire after seven days. Verification is required for email/password sign-in, reset tokens expire and are single-use, and password reset revokes existing sessions. Deletion requires typed confirmation in the UI, an active session and an emailed token that expires after one hour. It removes the user and linked account/session records while keeping the local animation project. Downloads check the server session before export and again before saving. Sign-in redirects preserve the local project, selected export format and PNG timeline position; returning reopens the export dialog. JSON project downloads also require sign-in. The Node export API requires a live session and restricts every job to its creator. Browser-generated exports use a product-level login gate; rendering remains client-side.
 
 ## Validation and limits
 

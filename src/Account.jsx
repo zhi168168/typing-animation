@@ -166,7 +166,7 @@ export function AccountPage() {
         setConfig(settings);
         if (!settings.configured) {
           setError(
-            "Accounts are not available yet. You can still create and export animations.",
+            "Sign-in is currently unavailable. You can keep creating and previewing; downloads require sign-in.",
           );
           return;
         }
@@ -180,6 +180,10 @@ export function AccountPage() {
           !["reset", "delete", "mailbox"].includes(requestedView)
         )
           setView("account");
+        if (query.has("download"))
+          setNotice(
+            "Sign in to download. Your animation is saved; return to the editor to continue exporting.",
+          );
         if (query.has("verified"))
           setNotice("Email verified. You can now sign in.");
         if (query.has("deleted"))
@@ -313,8 +317,8 @@ export function AccountPage() {
     <div className="account-layout">
       <nav className="account-topbar" aria-label="Account navigation">
         <a className="site-wordmark" href="/">
+          <img className="brand-logo" src="/logo.png" width="32" height="32" alt="" />
           Typing Animation
-          <span className="wordmark-cursor" aria-hidden="true" />
         </a>
         <a className="account-back" href={returnTo}>
           <ArrowLeft size={16} /> Back to{" "}
@@ -684,8 +688,8 @@ export function AccountPage() {
           )
         )}
         <p className="account-footnote">
-          Your animation project stays in this browser. Signing in is optional.{" "}
-          <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
+          Your animation project stays in this browser. Sign in to download.{" "}
+          <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
         </p>
         {config?.localMailbox && view !== "mailbox" && (
           <a

@@ -8,6 +8,7 @@ import { once } from "node:events";
 import { accountConfig } from "../accounts/config.mjs";
 import { createAccounts } from "../accounts/auth.mjs";
 import { mountAccounts } from "../accounts/http.mjs";
+import { exportAccess } from "../accounts/export-access.mjs";
 
 const origin = "http://127.0.0.1:3000";
 const config = accountConfig({
@@ -47,6 +48,48 @@ async function fixture(t) {
   });
   return { service, call, messages, directory, options };
 }
+
+test("Export API blocks guests, other owners and revoked real sessions", async (t) => {
+  const { service, call, messages } = await fixture(t);
+  await call("sign-up/email", {
+    name: "Exporter",
+    email: "exporter@example.test",
+    password: "ExporterPass123!",
+  });
+  await service.auth.handler(new Request(emailURL(messages[0])));
+  const cookie = cookies(
+    await call("sign-in/email", {
+      email: "exporter@example.test",
+      password: "ExporterPass123!",
+    }),
+  );
+  const session = await (await call("get-session", undefined, cookie)).json();
+  const app = express();
+  app.use(
+    "/api/exports",
+    exportAccess(
+      service,
+      new Map([
+        ["mine", { userId: session.user.id }],
+        ["other", { userId: "someone-else" }],
+      ]),
+    ),
+  );
+  app.use("/api/exports", (req, res) => res.json({ userId: req.exportUserId }));
+  const server = app.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}/api/exports`;
+  for (const method of ["GET", "POST", "PUT", "DELETE"])
+    assert.equal((await fetch(`${base}/mine/file`, { method })).status, 401);
+  const headers = { cookie };
+  assert.equal((await fetch(base, { method: "POST", headers })).status, 200);
+  assert.equal((await fetch(`${base}/mine/file`, { headers })).status, 200);
+  assert.equal((await fetch(`${base}/other/file`, { headers })).status, 404);
+  assert.equal((await fetch(`${base}/missing/file`, { headers })).status, 404);
+  await call("sign-out", {}, cookie);
+  assert.equal((await fetch(`${base}/mine/file`, { headers })).status, 401);
+});
 
 test("Account configuration isolates localhost and rejects partial or unsafe public credentials", () => {
   assert.equal(accountConfig({}), null);

@@ -1,7 +1,9 @@
 import { dimensions, timeline, render } from "./engine";
 import engineSource from "./engine.js?raw";
 import { ensureFonts, embeddedFontCSS, selectedFont } from "./font-loader.js";
-export function download(blob, name) {
+import { requireDownloadSession } from "./download-access.js";
+export async function download(blob, name) {
+  await requireDownloadSession();
   const url = URL.createObjectURL(blob),
     a = document.createElement("a");
   a.href = url;
@@ -14,7 +16,7 @@ export async function htmlExport(s) {
   const source = engineSource.replaceAll("export ", "");
   const config = JSON.stringify(s).replaceAll("<", "\\u003c");
   const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typing Animation animation</title><style>${fontCSS}html,body{margin:0;width:100%;height:100%;display:grid;place-items:center;background:transparent}canvas{max-width:100%;max-height:100vh;object-fit:contain}</style><canvas aria-label="Typing animation"></canvas><script>${source}\nconst s=${config};const canvas=document.querySelector('canvas');[canvas.width,canvas.height]=dimensions(s);const t=timeline(s);let start;function frame(now){start??=now;const elapsed=now-start;render(canvas,s,s.loop?elapsed%t.duration:Math.min(elapsed,t.duration),t);if(s.loop||elapsed<t.duration)requestAnimationFrame(frame)}Promise.all([${JSON.stringify(selectedFont(s).face)},'TF Noto Sans SC'].map(f=>document.fonts.load((s.italic?'italic ':'normal ')+s.weight+' 32px '+JSON.stringify(f),s.text||'Aa'))).then(()=>requestAnimationFrame(frame)).catch(()=>{document.body.textContent='Unable to load embedded fonts.'});<\/script></html>`;
-  download(
+  await download(
     new Blob([html], { type: "text/html;charset=utf-8" }),
     "typing-animation.html",
   );
@@ -24,7 +26,9 @@ export async function pngExport(s, ms) {
   const c = document.createElement("canvas");
   [c.width, c.height] = dimensions(s);
   render(c, s, ms);
-  c.toBlob((b) => download(b, "typing-animation.png"));
+  const blob = await new Promise((resolve) => c.toBlob(resolve));
+  if (!blob) throw new Error("Could not create the PNG. Please try again.");
+  await download(blob, "typing-animation.png");
 }
 async function request(url, options) {
   const r = await fetch(url, options);
@@ -39,7 +43,7 @@ export async function videoExport(s, format, onProgress, signal) {
   if (__BROWSER_VIDEO_EXPORT__) {
     const { browserVideoExport } = await import("./browser-video.js");
     const blob = await browserVideoExport(s, format, onProgress, signal);
-    download(blob, `typing-animation.${format}`);
+    await download(blob, `typing-animation.${format}`);
     return;
   }
   const [width, height] = dimensions(s),
@@ -99,7 +103,7 @@ export async function videoExport(s, format, onProgress, signal) {
     }
     const r = await fetch(`/api/exports/${id}/file`, { signal });
     if (!r.ok) throw new Error("File download failed");
-    download(await r.blob(), `typing-animation.${format}`);
+    await download(await r.blob(), `typing-animation.${format}`);
   } finally {
     if (id)
       await fetch(`/api/exports/${id}`, { method: "DELETE" }).catch(() => {});

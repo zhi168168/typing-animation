@@ -35,6 +35,25 @@ export function applySiteMetadata(html, origin, pathname = "/") {
     name: "Typing Animation",
     url: `${origin}/`,
     inLanguage: "en",
+    publisher: {
+      "@type": "Organization",
+      "@id": `${origin}/#organization`,
+      name: "Typing Animation",
+      url: `${origin}/`,
+      email: "zhihaosong168@gmail.com",
+      contactPoint: {
+        "@type": "ContactPoint",
+        contactType: "customer support",
+        email: "zhihaosong168@gmail.com",
+        url: `${origin}/contact.html`,
+      },
+      logo: {
+        "@type": "ImageObject",
+        url: `${origin}/favicon-512.png`,
+        width: 512,
+        height: 512,
+      },
+    },
   }).replaceAll("<", "\\u003c");
   return html.replace(
     "<!-- site-metadata -->",
@@ -42,6 +61,7 @@ export function applySiteMetadata(html, origin, pathname = "/") {
     <link data-site="true" rel="canonical" href="${url}" />
     <meta data-site="true" property="og:url" content="${url}" />
     <meta data-site="true" property="og:image" content="${image}" />
+    <meta data-site="true" property="og:image:type" content="image/png" />
     <meta data-site="true" property="og:image:width" content="1200" />
     <meta data-site="true" property="og:image:height" content="630" />
     <meta data-site="true" property="og:image:alt" content="Typing Animation typing animation generator with font, timing and export controls" />
@@ -56,5 +76,6 @@ export function robots(origin) {
 }
 
 export function sitemap(origin) {
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${escapeAttribute(origin)}/</loc></url><url><loc>${escapeAttribute(origin)}/editor</loc></url></urlset>\n`;
+  const paths = ["/", "/editor", "/about.html", "/contact.html"];
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map((pathname) => `<url><loc>${escapeAttribute(origin)}${pathname}</loc></url>`).join("")}</urlset>\n`;
 }

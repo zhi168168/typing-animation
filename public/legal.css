@@ -13,12 +13,19 @@ body {
 a {
   color: #c5b4f1;
   text-underline-offset: 4px;
+  overflow-wrap: anywhere;
 }
 nav {
   display: flex;
   gap: 24px;
   margin-bottom: 56px;
   font-size: 14px;
+}
+.legal-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #efedf5;
 }
 h1 {
   font-size: 36px;

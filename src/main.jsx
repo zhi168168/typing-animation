@@ -47,13 +47,36 @@ import {
 } from "./audio.js";
 import "./styles.css";
 import "./studio.css";
+import "./landing.css";
+import "./brand.css";
+import { HeroDemo } from "./HeroDemo.jsx";
+import { landingDemos } from "./landing-demos.js";
 import { ensureFonts } from "./font-loader.js";
 import { TemplateGallery } from "./TemplateGallery";
 import { Button } from "./controls";
 import { SettingsPanel } from "./SettingsPanel";
 import { AccountLink, AccountPage } from "./Account";
+import { requireDownloadSession } from "./download-access.js";
+
+function pendingDownload() {
+  try {
+    const pending = JSON.parse(
+      sessionStorage.getItem("typeflow-pending-download"),
+    );
+    return pending &&
+      Date.now() - pending.created < 60 * 60 * 1000 &&
+      ["webm", "mp4", "html", "png", "project"].includes(pending.format)
+      ? pending
+      : null;
+  } catch {
+    return null;
+  }
+}
 
 function load() {
+  const demoId = new URLSearchParams(window.location.search).get("demo");
+  const demo = landingDemos.find((item) => item.id === demoId);
+  if (demo && !pendingDownload()) return validateProject(demo.settings);
   try {
     const saved = JSON.parse(localStorage.getItem("typeflow-project"));
     // Upgrade the previous starter copy without replacing authored projects.
@@ -67,6 +90,17 @@ function load() {
 const timeLabel = (ms) =>
   `${Math.floor(ms / 60000)}:${((ms / 1000) % 60).toFixed(2).padStart(5, "0")}`;
 function App() {
+  const [pending] = useState(pendingDownload);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (landingDemos.some((demo) => demo.id === url.searchParams.get("demo"))) {
+      url.searchParams.delete("demo");
+      window.history.replaceState(null, "", url);
+    }
+  }, []);
+  useEffect(() => {
+    sessionStorage.removeItem("typeflow-pending-download");
+  }, []);
   useEffect(() => {
     const templateLinks = [
       ...document.querySelectorAll("[data-open-templates]"),
@@ -95,19 +129,25 @@ function App() {
   const [soundLoading, setSoundLoading] = useState(false);
   const [fontState, setFontState] = useState({ key: "", error: "" });
   const [s, setS] = useState(load),
-    [ms, setMs] = useState(0),
-    [playing, setPlaying] = useState(true),
+    [ms, setMs] = useState(() =>
+      Number.isFinite(pending?.ms) ? pending.ms : 0,
+    ),
+    [playing, setPlaying] = useState(!pending),
     [panel, setPanel] = useState("text"),
     [modal, setModal] = useState(() =>
       new URLSearchParams(window.location.search).get("templates") === "1"
         ? "templates"
-        : null,
+        : pending && pending.format !== "project"
+          ? "export"
+          : null,
     ),
     [theme, setTheme] = useState(
       () => localStorage.getItem("typeflow-theme") || "dark",
     ),
     [toast, setToast] = useState(""),
-    [format, setFormat] = useState("webm"),
+    [format, setFormat] = useState(
+      pending && pending.format !== "project" ? pending.format : "webm",
+    ),
     [progress, setProgress] = useState(null),
     [recording, setRecording] = useState(false),
     [sound, setSound] = useState(
@@ -151,6 +191,28 @@ function App() {
     }));
   };
   const notify = (msg) => setToast(msg);
+  function downloadError(error, requestedFormat = format) {
+    if (error.code === "SIGN_IN_REQUIRED") {
+      try {
+        localStorage.setItem("typeflow-project", JSON.stringify(s));
+        sessionStorage.setItem(
+          "typeflow-pending-download",
+          JSON.stringify({
+            format: requestedFormat,
+            ms,
+            created: Date.now(),
+          }),
+        );
+        window.location.assign(
+          "/account?view=login&returnTo=%2Feditor&download=1",
+        );
+      } catch {
+        notify(
+          "Could not save your project before sign-in. Please allow browser storage and try again.",
+        );
+      }
+    } else notify(error.message || "Download failed. Please try again.");
+  }
   useEffect(() => {
     localStorage.setItem("typeflow-sound-pack", soundPack);
     localStorage.setItem("typeflow-sound-default", defaultSound);
@@ -409,6 +471,14 @@ function App() {
     if (recording)
       return notify("Stop recording your typing rhythm before exporting.");
     setPlaying(false);
+    setProgress({ percent: 0, message: "Checking sign-in…" });
+    try {
+      await requireDownloadSession();
+    } catch (error) {
+      downloadError(error);
+      setProgress(null);
+      return;
+    }
     if (format === "html" || format === "png") {
       setProgress({ percent: 0, message: "Preparing fonts and file…" });
       try {
@@ -420,13 +490,16 @@ function App() {
             : "Current frame exported",
         );
       } catch (error) {
-        notify(error.message || "Fonts could not load. Please try again.");
+        downloadError(error);
       } finally {
         setProgress(null);
       }
       return;
     }
-    if (s.background === "transparent" && format === "mp4") return;
+    if (s.background === "transparent" && format === "mp4") {
+      setProgress(null);
+      return;
+    }
     abort.current = new AbortController();
     setProgress({ percent: 0, message: "Preparing export…" });
     try {
@@ -435,7 +508,8 @@ function App() {
       notify("Video created and downloaded");
       setModal(null);
     } catch (e) {
-      notify(e.name === "AbortError" ? "Export cancelled" : e.message);
+      if (e.name === "AbortError") notify("Export cancelled");
+      else downloadError(e);
     } finally {
       setProgress(null);
       abort.current = null;
@@ -456,7 +530,13 @@ function App() {
           aria-label="Back to home"
           title="Back to home"
         >
-          <Keyboard size={19} strokeWidth={1.6} />
+          <img
+            className="brand-logo"
+            src="/logo.png"
+            width="28"
+            height="28"
+            alt=""
+          />
           <span>Editor</span>
         </a>
         <div className="header-divider" />
@@ -485,15 +565,19 @@ function App() {
           <Button
             className="quiet-button save-button"
             icon={Save}
-            onClick={() => {
-              download(
-                new Blob(
-                  [JSON.stringify({ version: 1, settings: s }, null, 2)],
-                  { type: "application/json" },
-                ),
-                "typing-animation-project.json",
-              );
-              notify("Project file saved");
+            onClick={async () => {
+              try {
+                await download(
+                  new Blob(
+                    [JSON.stringify({ version: 1, settings: s }, null, 2)],
+                    { type: "application/json" },
+                  ),
+                  "typing-animation-project.json",
+                );
+                notify("Project file saved");
+              } catch (error) {
+                downloadError(error, "project");
+              }
             }}
           >
             Save project
@@ -684,7 +768,7 @@ function App() {
           <footer className="workspace-footer">
             <span>
               <span className="local-dot" />
-              No sign-up required
+              Free to edit · Sign in to download
             </span>
             <Button
               className="text-button"
@@ -786,7 +870,8 @@ function App() {
                 <p>
                   {
                     {
-                      export: "Choose a format to download your animation.",
+                      export:
+                        "Choose a format. Sign in to download; your project stays saved.",
                       templates:
                         "Choose a starting point and make the words your own.",
                       help: "Go from text to animation in a few steps.",
@@ -983,71 +1068,6 @@ function App() {
         </div>
       )}
     </div>
-  );
-}
-function HeroDemo() {
-  const phrases = [
-    "Make every word count.",
-    "Give your ideas a rhythm.",
-    "Your next story starts here.",
-  ];
-  const [paused, setPaused] = useState(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
-  const [frame, setFrame] = useState({ phrase: 0, count: 0, deleting: false });
-  useEffect(() => {
-    if (paused) return;
-    const text = phrases[frame.phrase];
-    const complete = frame.count === text.length;
-    const delay = frame.deleting
-      ? 35
-      : complete
-        ? 1900
-        : frame.count === 0
-          ? 450
-          : 85;
-    const timer = window.setTimeout(() => {
-      setFrame((current) => {
-        if (
-          !current.deleting &&
-          current.count === phrases[current.phrase].length
-        )
-          return { ...current, deleting: true };
-        if (current.deleting && current.count === 0)
-          return {
-            phrase: (current.phrase + 1) % phrases.length,
-            count: 0,
-            deleting: false,
-          };
-        return {
-          ...current,
-          count: current.count + (current.deleting ? -1 : 1),
-        };
-      });
-    }, delay);
-    return () => window.clearTimeout(timer);
-  }, [frame, paused]);
-  return (
-    <>
-      <div className="hero-demo-line" aria-hidden="true">
-        <span>
-          {paused && frame.count === 0
-            ? phrases[0]
-            : phrases[frame.phrase].slice(0, frame.count)}
-        </span>
-        <span className={`hero-demo-cursor${paused ? " is-paused" : ""}`} />
-      </div>
-      <span className="sr-only">
-        A looping preview of text appearing one character at a time.
-      </span>
-      <button
-        className="hero-demo-toggle"
-        aria-label={paused ? "Play demo" : "Pause demo"}
-        onClick={() => setPaused((value) => !value)}
-      >
-        {paused ? <Play size={15} /> : <Pause size={15} />}
-      </button>
-    </>
   );
 }
 try {
