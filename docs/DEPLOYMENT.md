@@ -140,6 +140,7 @@ node --env-file=work/production.env accounts/migrate.mjs
 - 邮箱功能不可用：检查 SMTP_HOST 和 SMTP_FROM 是否同时设置，SMTP_USER/PASS 是否成对。
 - `relation ... does not exist`：尚未对这个数据库运行迁移，或连接到了错误分支。
 - Google `redirect_uri_mismatch`：回调 URI 需要与本文地址逐字符一致。
+- Google 按钮提示地址不匹配或接口返回 `403 Origin is not allowed`：检查浏览器地址是否变成 `www.typing-animation.com`。Vercel → Settings → Domains 中，`typing-animation.com` 应连接 Production，`www.typing-animation.com` 应重定向至 `typing-animation.com`，不要反过来。ACCOUNT_ORIGIN 和 Google 回调继续保持本文的不带 www 地址。
 - Google 只允许少量用户：检查 Audience 的 Testing 状态和 Test users，按要求发布应用。
 - 验证邮件没到：查看 Vercel 函数日志和邮件平台发送记录、DNS 验证状态及垃圾箱；不要公开带 token 的邮件链接或日志。
 - 首次视频导出慢：浏览器首次加载约 32 MB 编码器，并逐帧编码；保持页面打开，必要时使用桌面浏览器。

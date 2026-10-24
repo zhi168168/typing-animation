@@ -137,11 +137,8 @@ button.account-primary:hover {
   font-size: 14px;
   gap: 12px;
 }
-.google-letter {
-  font:
-    600 19px Arial,
-    sans-serif;
-  color: var(--text);
+.google-icon {
+  flex-shrink: 0;
 }
 .account-provider-note {
   font-size: 12px;

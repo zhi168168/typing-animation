@@ -28,7 +28,11 @@ export async function accountAPI(path, data) {
           ? "Account service is temporarily unavailable. Please try again."
           : "Please check your details and try again.",
     );
-    error.code = result?.code;
+    error.code =
+      result?.code ||
+      (result?.message === "Origin is not allowed"
+        ? "INVALID_ORIGIN"
+        : undefined);
     error.status = response.status;
     throw error;
   }
@@ -208,6 +212,12 @@ export function AccountPage() {
       await task();
     } catch (failure) {
       const messages = {
+        INVALID_ORIGIN:
+          "Sign-in could not start because this website address does not match its account configuration.",
+        INVALID_CALLBACK_URL:
+          "Sign-in could not start because the return address is not allowed.",
+        INVALID_ERROR_CALLBACK_URL:
+          "Sign-in could not start because the return address is not allowed.",
         INVALID_EMAIL_OR_PASSWORD: "Email or password is incorrect.",
         EMAIL_NOT_VERIFIED:
           "Please verify your email first. You can request a new verification link below.",
@@ -516,9 +526,30 @@ export function AccountPage() {
                       })
                     }
                   >
-                    <span aria-hidden="true" className="google-letter">
-                      G
-                    </span>{" "}
+                    <svg
+                      className="google-icon"
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                    >
+                      <path
+                        fill="#4285F4"
+                        d="M21.6 12.227c0-.709-.064-1.391-.182-2.045H12v3.868h5.382a4.6 4.6 0 0 1-1.996 3.018v2.509h3.233c1.891-1.741 2.981-4.305 2.981-7.35Z"
+                      />
+                      <path
+                        fill="#34A853"
+                        d="M12 22c2.7 0 4.964-.895 6.619-2.423l-3.233-2.509c-.895.6-2.041.955-3.386.955-2.605 0-4.81-1.76-5.596-4.123H3.062v2.591A10 10 0 0 0 12 22Z"
+                      />
+                      <path
+                        fill="#FBBC05"
+                        d="M6.404 13.9A6 6 0 0 1 6.09 12c0-.659.114-1.3.314-1.9V7.509H3.062A10 10 0 0 0 2 12c0 1.614.386 3.141 1.062 4.491L6.404 13.9Z"
+                      />
+                      <path
+                        fill="#EA4335"
+                        d="M12 5.977c1.468 0 2.786.505 3.823 1.496l2.868-2.868C16.959 2.991 14.695 2 12 2a10 10 0 0 0-8.938 5.509L6.404 10.1C7.19 7.736 9.395 5.977 12 5.977Z"
+                      />
+                    </svg>{" "}
                     Continue with Google
                   </button>
                   {!config?.google && (
