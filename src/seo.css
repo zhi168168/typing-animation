@@ -148,6 +148,7 @@ body {
 .seo-footer {
   padding: 32px 0;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 20px;
   font-size: 12px;
@@ -155,6 +156,20 @@ body {
 }
 .seo-footer a {
   color: var(--accent, #c8b7f5);
+}
+.footer-badges {
+  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-badges a,
+.footer-badges img {
+  display: block;
+}
+.footer-badges img {
+  max-width: 100%;
 }
 .skip-link {
   position: absolute;
