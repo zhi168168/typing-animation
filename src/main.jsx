@@ -47,6 +47,10 @@ import {
 } from "./audio.js";
 import "./styles.css";
 import "./studio.css";
+import "./landing.css";
+import "./brand.css";
+import { HeroDemo } from "./HeroDemo.jsx";
+import { landingDemos } from "./landing-demos.js";
 import { ensureFonts } from "./font-loader.js";
 import { TemplateGallery } from "./TemplateGallery";
 import { Button } from "./controls";
@@ -54,6 +58,9 @@ import { SettingsPanel } from "./SettingsPanel";
 import { AccountLink, AccountPage } from "./Account";
 
 function load() {
+  const demoId = new URLSearchParams(window.location.search).get("demo");
+  const demo = landingDemos.find((item) => item.id === demoId);
+  if (demo) return validateProject(demo.settings);
   try {
     const saved = JSON.parse(localStorage.getItem("typeflow-project"));
     // Upgrade the previous starter copy without replacing authored projects.
@@ -67,6 +74,13 @@ function load() {
 const timeLabel = (ms) =>
   `${Math.floor(ms / 60000)}:${((ms / 1000) % 60).toFixed(2).padStart(5, "0")}`;
 function App() {
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (landingDemos.some((demo) => demo.id === url.searchParams.get("demo"))) {
+      url.searchParams.delete("demo");
+      window.history.replaceState(null, "", url);
+    }
+  }, []);
   useEffect(() => {
     const templateLinks = [
       ...document.querySelectorAll("[data-open-templates]"),
@@ -983,71 +997,6 @@ function App() {
         </div>
       )}
     </div>
-  );
-}
-function HeroDemo() {
-  const phrases = [
-    "Make every word count.",
-    "Give your ideas a rhythm.",
-    "Your next story starts here.",
-  ];
-  const [paused, setPaused] = useState(
-    () => window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
-  const [frame, setFrame] = useState({ phrase: 0, count: 0, deleting: false });
-  useEffect(() => {
-    if (paused) return;
-    const text = phrases[frame.phrase];
-    const complete = frame.count === text.length;
-    const delay = frame.deleting
-      ? 35
-      : complete
-        ? 1900
-        : frame.count === 0
-          ? 450
-          : 85;
-    const timer = window.setTimeout(() => {
-      setFrame((current) => {
-        if (
-          !current.deleting &&
-          current.count === phrases[current.phrase].length
-        )
-          return { ...current, deleting: true };
-        if (current.deleting && current.count === 0)
-          return {
-            phrase: (current.phrase + 1) % phrases.length,
-            count: 0,
-            deleting: false,
-          };
-        return {
-          ...current,
-          count: current.count + (current.deleting ? -1 : 1),
-        };
-      });
-    }, delay);
-    return () => window.clearTimeout(timer);
-  }, [frame, paused]);
-  return (
-    <>
-      <div className="hero-demo-line" aria-hidden="true">
-        <span>
-          {paused && frame.count === 0
-            ? phrases[0]
-            : phrases[frame.phrase].slice(0, frame.count)}
-        </span>
-        <span className={`hero-demo-cursor${paused ? " is-paused" : ""}`} />
-      </div>
-      <span className="sr-only">
-        A looping preview of text appearing one character at a time.
-      </span>
-      <button
-        className="hero-demo-toggle"
-        aria-label={paused ? "Play demo" : "Pause demo"}
-        onClick={() => setPaused((value) => !value)}
-      >
-        {paused ? <Play size={15} /> : <Pause size={15} />}
-      </button>
-    </>
   );
 }
 try {

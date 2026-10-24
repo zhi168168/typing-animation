@@ -1,0 +1,43 @@
+.brand-logo {
+  display: inline-block;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+:root[data-theme="light"] .brand-logo {
+  filter: none;
+}
+.site-wordmark,
+.landing-page .site-wordmark {
+  gap: 10px;
+  white-space: nowrap;
+}
+.editor-brand .brand-logo {
+  width: 28px;
+  height: 28px;
+}
+.footer-brand {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  vertical-align: middle;
+}
+@media (max-width: 480px) {
+  .site-wordmark,
+  .landing-page .site-wordmark {
+    font-size: 16px;
+    letter-spacing: -0.6px;
+    gap: 7px;
+  }
+  .site-wordmark .brand-logo {
+    width: 25px;
+    height: 25px;
+  }
+  .account-topbar {
+    gap: 12px;
+  }
+  .editor-brand .brand-logo {
+    width: 24px;
+    height: 24px;
+  }
+}
