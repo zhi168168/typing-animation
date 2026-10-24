@@ -52,7 +52,7 @@
         "applicationCategory": "MultimediaApplication",
         "operatingSystem": "Web browser",
         "inLanguage": "en",
-        "browserRequirements": "Requires JavaScript and a modern browser. Video export requires the site's encoding server.",
+        "browserRequirements": "Requires JavaScript, WebAssembly and a modern browser with enough memory for video export.",
         "featureList": [
           "32 open-source fonts",
           "24 editable templates",
@@ -60,6 +60,7 @@
           "Transparent WebM video",
           "MP4 video",
           "Standalone HTML animation",
+          "Six keyboard sound packs for MP4, WebM and HTML exports",
           "PNG frame export"
         ]
       }
@@ -161,7 +162,9 @@
             <p>
               Press play and scrub the timeline to inspect individual frames.
               Choose your aspect ratio and background in Canvas, then download
-              the format that fits your project.
+              the format that fits your project. Pick one of six keyboard sound
+              packs to include synchronized typing sounds, or mute sounds for a
+              silent export.
             </p>
           </li>
         </ol>
@@ -222,7 +225,7 @@
               </tr>
               <tr>
                 <th scope="row">WebM</th>
-                <td>VP9 video and text overlays</td>
+                <td>Video and text overlays with optional typing sounds</td>
                 <td>Yes — alpha support depends on your player or editor</td>
               </tr>
               <tr>
@@ -242,9 +245,11 @@
           </table>
         </div>
         <p>
-          HTML and PNG are generated in your browser. MP4 and WebM frames are
-          encoded in your browser on the hosted site. Keyboard sounds are
-          preview-only and are not included in exported files.
+          All exports are generated in your browser on this site. MP4, WebM and
+          HTML include your selected keyboard sounds when sound is enabled; mute
+          sounds in the editor for a silent export. Exported HTML works offline:
+          click Play to start the animation with sound. PNG is a still image and
+          has no audio.
         </p>
       </section>
       <section id="faq" aria-labelledby="faq-title">
@@ -286,8 +291,10 @@
         <details>
           <summary>Are keyboard sounds included in the download?</summary>
           <p>
-            No. The six keyboard sound packs are for preview only. Exported
-            videos and HTML animations do not include keyboard audio.
+            Yes. MP4, WebM and HTML exports include your selected keyboard sound
+            pack when sound is enabled in the editor. Mute sounds for a silent
+            export. HTML playback with sound starts when you click Play. PNG is
+            a still image and has no audio.
           </p>
         </details>
         <details>

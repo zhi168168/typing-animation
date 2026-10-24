@@ -482,7 +482,8 @@ function App() {
     if (format === "html" || format === "png") {
       setProgress({ percent: 0, message: "Preparing fonts and file…" });
       try {
-        if (format === "html") await htmlExport(s);
+        if (format === "html")
+          await htmlExport(s, { enabled: sound, pack: soundPack });
         else await pngExport(s, ms);
         notify(
           format === "html"
@@ -504,7 +505,10 @@ function App() {
     setProgress({ percent: 0, message: "Preparing export…" });
     try {
       await document.fonts.ready;
-      await videoExport(s, format, setProgress, abort.current.signal);
+      await videoExport(s, format, setProgress, abort.current.signal, {
+        enabled: sound,
+        pack: soundPack,
+      });
       notify("Video created and downloaded");
       setModal(null);
     } catch (e) {
@@ -679,10 +683,10 @@ function App() {
                 icon={sound ? Volume2 : VolumeX}
                 title={
                   sound
-                    ? "Mute typing sounds (preview only)"
-                    : "Enable typing sounds (preview only)"
+                    ? "Mute typing sounds in preview and exports"
+                    : "Enable typing sounds in preview and exports"
                 }
-                aria-label="Toggle preview typing sounds"
+                aria-label="Toggle typing sounds in preview and exports"
                 aria-pressed={sound}
                 disabled={soundLoading}
                 onClick={toggleSound}
@@ -971,7 +975,13 @@ function App() {
                       : format === "png"
                         ? "Exports the current frame. Scrub the timeline to choose a frame before exporting."
                         : "Uses H.264 for compatibility with most video players and editors."}
-                  {sound ? " Typing sounds are for preview only." : ""}
+                  {format !== "png" &&
+                    (sound
+                      ? ` Includes ${soundOptions.find((option) => option.id === soundPack)?.label || "selected keyboard"} typing sounds.`
+                      : " Typing sounds are muted in this export.")}
+                  {format === "html" &&
+                    sound &&
+                    " Click Play in the exported page to start with sound."}
                 </p>
                 {progress ? (
                   <div className="export-progress">

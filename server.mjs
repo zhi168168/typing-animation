@@ -118,6 +118,32 @@ app.put(
     res.json({ ok: true });
   },
 );
+app.put(
+  "/api/exports/:id/audio",
+  express.raw({ type: "audio/wav", limit: "80mb" }),
+  async (req, res) => {
+    const j = jobs.get(req.params.id),
+      wav = req.body;
+    const expected = j ? Math.ceil(((j.frames * 1000) / j.fps) * 48) * 2 : 0;
+    if (
+      !j ||
+      j.status !== "frames" ||
+      !Buffer.isBuffer(wav) ||
+      wav.length !== expected + 44 ||
+      wav.toString("ascii", 0, 4) !== "RIFF" ||
+      wav.toString("ascii", 8, 12) !== "WAVE" ||
+      wav.readUInt16LE(20) !== 1 ||
+      wav.readUInt16LE(22) !== 1 ||
+      wav.readUInt32LE(24) !== 48000 ||
+      wav.readUInt16LE(34) !== 16 ||
+      wav.readUInt32LE(40) !== expected
+    )
+      return res.status(400).json({ error: "Invalid keyboard audio" });
+    await writeFile(path.join(j.dir, "keyboard.wav"), wav);
+    j.audio = true;
+    res.json({ ok: true });
+  },
+);
 app.post("/api/exports/:id/encode", (req, res) => {
   const j = jobs.get(req.params.id);
   if (!j || j.received !== j.frames || j.status !== "frames")
@@ -131,6 +157,15 @@ app.post("/api/exports/:id/encode", (req, res) => {
     "-i",
     path.join(j.dir, "%06d.png"),
   ];
+  if (j.audio)
+    args.push(
+      "-i",
+      path.join(j.dir, "keyboard.wav"),
+      "-c:a",
+      j.format === "mp4" ? "aac" : "libopus",
+      "-b:a",
+      "128k",
+    );
   if (j.format === "webm")
     args.push(
       "-c:v",

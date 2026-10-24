@@ -1,9 +1,16 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { dimensions, timeline, render } from "./engine.js";
+import { renderKeyboardAudio } from "./audio.js";
 
 // Single-threaded, self-hosted WebAssembly works without cross-origin isolation.
 // Each export owns its worker, so cancellation also frees its frame memory.
-export async function browserVideoExport(s, format, onProgress, signal) {
+export async function browserVideoExport(
+  s,
+  format,
+  onProgress,
+  signal,
+  audioOptions = {},
+) {
   signal.throwIfAborted();
   const encoder = new FFmpeg();
   const abort = () => encoder.terminate();
@@ -22,6 +29,16 @@ export async function browserVideoExport(s, format, onProgress, signal) {
         .href,
     });
     signal.throwIfAborted();
+    if (audioOptions.enabled) {
+      onProgress({ percent: 0, message: "Preparing keyboard audio…" });
+      const wav = await renderKeyboardAudio(
+        t,
+        audioOptions.pack,
+        (frames * 1000) / s.fps,
+        signal,
+      );
+      await encoder.writeFile("keyboard.wav", wav);
+    }
     const canvas = document.createElement("canvas");
     [canvas.width, canvas.height] = dimensions(s);
     for (let i = 0; i < frames; i++) {
@@ -47,6 +64,15 @@ export async function browserVideoExport(s, format, onProgress, signal) {
       }),
     );
     const args = ["-framerate", String(s.fps), "-i", "%06d.png"];
+    if (audioOptions.enabled)
+      args.push(
+        "-i",
+        "keyboard.wav",
+        "-c:a",
+        format === "mp4" ? "aac" : "libopus",
+        "-b:a",
+        "128k",
+      );
     if (format === "webm")
       args.push(
         "-c:v",

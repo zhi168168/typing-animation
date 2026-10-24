@@ -2,6 +2,7 @@ import { dimensions, timeline, render } from "./engine";
 import engineSource from "./engine.js?raw";
 import { ensureFonts, embeddedFontCSS, selectedFont } from "./font-loader.js";
 import { requireDownloadSession } from "./download-access.js";
+import { renderKeyboardAudio } from "./audio.js";
 export async function download(blob, name) {
   await requireDownloadSession();
   const url = URL.createObjectURL(blob),
@@ -11,11 +12,25 @@ export async function download(blob, name) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
-export async function htmlExport(s) {
+export async function htmlExport(s, audioOptions = {}) {
   const fontCSS = await embeddedFontCSS(s);
   const source = engineSource.replaceAll("export ", "");
   const config = JSON.stringify(s).replaceAll("<", "\\u003c");
-  const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typing Animation animation</title><style>${fontCSS}html,body{margin:0;width:100%;height:100%;display:grid;place-items:center;background:transparent}canvas{max-width:100%;max-height:100vh;object-fit:contain}</style><canvas aria-label="Typing animation"></canvas><script>${source}\nconst s=${config};const canvas=document.querySelector('canvas');[canvas.width,canvas.height]=dimensions(s);const t=timeline(s);let start;function frame(now){start??=now;const elapsed=now-start;render(canvas,s,s.loop?elapsed%t.duration:Math.min(elapsed,t.duration),t);if(s.loop||elapsed<t.duration)requestAnimationFrame(frame)}Promise.all([${JSON.stringify(selectedFont(s).face)},'TF Noto Sans SC'].map(f=>document.fonts.load((s.italic?'italic ':'normal ')+s.weight+' 32px '+JSON.stringify(f),s.text||'Aa'))).then(()=>requestAnimationFrame(frame)).catch(()=>{document.body.textContent='Unable to load embedded fonts.'});<\/script></html>`;
+  let audioURL = "";
+  if (audioOptions.enabled) {
+    const wav = await renderKeyboardAudio(timeline(s), audioOptions.pack);
+    audioURL = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () =>
+        reject(new Error("Could not embed keyboard audio"));
+      reader.readAsDataURL(new Blob([wav], { type: "audio/wav" }));
+    });
+  }
+  const playback = audioURL
+    ? `const audio=new Audio(${JSON.stringify(audioURL)});audio.loop=s.loop;const button=document.createElement('button');button.textContent='Play animation with sound';button.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 20px;cursor:pointer';document.body.append(button);render(canvas,s,0,t);function audioFrame(){render(canvas,s,Math.min(audio.currentTime*1000,t.duration),t);if(!audio.paused)requestAnimationFrame(audioFrame)}audio.onended=()=>{render(canvas,s,t.duration,t);button.hidden=false};button.onclick=async()=>{try{await audio.play();button.hidden=true;requestAnimationFrame(audioFrame)}catch{button.textContent='Click to retry playback'}};`
+    : `requestAnimationFrame(frame);`;
+  const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typing Animation animation</title><style>${fontCSS}html,body{margin:0;width:100%;height:100%;display:grid;place-items:center;background:transparent}canvas{max-width:100%;max-height:100vh;object-fit:contain}</style><canvas aria-label="Typing animation"></canvas><script>${source}\nconst s=${config};const canvas=document.querySelector('canvas');[canvas.width,canvas.height]=dimensions(s);const t=timeline(s);let start;function frame(now){start??=now;const elapsed=now-start;render(canvas,s,s.loop?elapsed%t.duration:Math.min(elapsed,t.duration),t);if(s.loop||elapsed<t.duration)requestAnimationFrame(frame)}Promise.all([${JSON.stringify(selectedFont(s).face)},'TF Noto Sans SC'].map(f=>document.fonts.load((s.italic?'italic ':'normal ')+s.weight+' 32px '+JSON.stringify(f),s.text||'Aa'))).then(()=>{${playback}}).catch(()=>{document.body.textContent='Unable to load embedded fonts.'});<\/script></html>`;
   await download(
     new Blob([html], { type: "text/html;charset=utf-8" }),
     "typing-animation.html",
@@ -38,11 +53,23 @@ async function request(url, options) {
   }
   return r.json();
 }
-export async function videoExport(s, format, onProgress, signal) {
+export async function videoExport(
+  s,
+  format,
+  onProgress,
+  signal,
+  audioOptions = {},
+) {
   await ensureFonts(s);
   if (__BROWSER_VIDEO_EXPORT__) {
     const { browserVideoExport } = await import("./browser-video.js");
-    const blob = await browserVideoExport(s, format, onProgress, signal);
+    const blob = await browserVideoExport(
+      s,
+      format,
+      onProgress,
+      signal,
+      audioOptions,
+    );
     await download(blob, `typing-animation.${format}`);
     return;
   }
@@ -72,6 +99,21 @@ export async function videoExport(s, format, onProgress, signal) {
       signal,
     });
     id = job.id;
+    if (audioOptions.enabled) {
+      onProgress({ percent: 0, message: "Preparing keyboard audio…" });
+      const wav = await renderKeyboardAudio(
+        t,
+        audioOptions.pack,
+        (frames * 1000) / s.fps,
+        signal,
+      );
+      await request(`/api/exports/${id}/audio`, {
+        method: "PUT",
+        headers: { "Content-Type": "audio/wav" },
+        body: wav,
+        signal,
+      });
+    }
     for (let i = 0; i < frames; i++) {
       signal.throwIfAborted();
       render(c, s, i === frames - 1 ? t.duration : (i * 1000) / s.fps, t);
