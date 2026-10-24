@@ -1,4 +1,4 @@
-# Typeflow Typing Animation Generator
+# Typing Animation Generator
 
 面向英语用户的打字动画工具，提供英文界面、模板、预览与导出。
 
@@ -12,7 +12,7 @@ Vercel 使用 Node.js 24、`pnpm install --frozen-lockfile`、`pnpm build`、输
 
 ## 启动
 
-当前环境已安装依赖，双击 `启动 Typeflow.cmd`，或在本目录运行：
+当前环境已安装依赖，双击 `启动 Typing Animation.cmd`，或在本目录运行：
 
 ```powershell
 node server.mjs

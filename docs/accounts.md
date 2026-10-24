@@ -1,6 +1,6 @@
-# Typeflow accounts
+# Typing Animation accounts
 
-Adapt the inspected Compresser PDF flow to Typeflow: English email registration with confirmation, sign-in, verification resend, password reset, Google OAuth when configured, persistent sessions, profile/name editing, password change, sign-out and email-confirmed deletion. Accounts remain optional for animation creation and exports. Editing state stays in existing browser storage through account redirects.
+Adapt the inspected Compresser PDF flow to Typing Animation: English email registration with confirmation, sign-in, verification resend, password reset, Google OAuth when configured, persistent sessions, profile/name editing, password change, sign-out and email-confirmed deletion. Accounts remain optional for animation creation and exports. Editing state stays in existing browser storage through account redirects.
 
 ## Interface direction
 
@@ -34,6 +34,6 @@ The server enables only configured providers. Account passwords are hashed by Be
 
 Automated tests exercise the real persistent SQLite adapter: registration, blocked unverified sign-in, email verification, profile update, password change, reset/token reuse rejection, session revocation, database reopen, sign-out, email-confirmed deletion, cross-origin rejection, body limits and unsafe callback rejection. Existing animation/SEO tests remain in place.
 
-Built-in browser QA completed the full register → verify → sign in → return to editor → sign out → forgot/reset password → sign in with new password → request deletion → confirm email → signed-out flow using a disposable local test identity. The original animation text survived sign-in and deletion. No real email, Google authorization, production database or public deployment has been tested because Typeflow's external credentials have not been supplied.
+Built-in browser QA completed the full register → verify → sign in → return to editor → sign out → forgot/reset password → sign in with new password → request deletion → confirm email → signed-out flow using a disposable local test identity. The original animation text survived sign-in and deletion. No real email, Google authorization, production database or public deployment has been tested because Typing Animation's external credentials have not been supplied.
 
 Final checks: production build and all 18 tests pass. Desktop screenshots at native 1280px and mobile at 390x844 were inspected with view_image. Typography, neutral palette, field/button scale, navigation, status feedback and mobile gutters match the existing design system. Form switches return to the top, passwords can be shown/hidden, and there is no horizontal overflow in the mobile account page, homepage header or editor header. Final screenshots: docs/design/account-signin.jpg, account-register.jpg and account-mobile.png. The temporary QA account was deleted through the actual confirmation flow; its local test messages were removed. No public account service has been enabled.

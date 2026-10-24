@@ -350,7 +350,9 @@ button.account-primary:hover {
     display: none;
   }
   .site-navigation .site-wordmark {
-    font-size: 20px;
+    font-size: clamp(14px, 4vw, 18px);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   .editor-page .header-actions > .account-nav-link {
     font-size: 11px;

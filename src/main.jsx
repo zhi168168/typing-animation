@@ -399,7 +399,9 @@ function App() {
       setPlaying(false);
       notify("Project imported");
     } catch {
-      notify("Could not read this project. Choose a Typeflow JSON file.");
+      notify(
+        "Could not read this project. Choose a Typing Animation JSON file.",
+      );
     }
     e.target.value = "";
   }
@@ -489,7 +491,7 @@ function App() {
                   [JSON.stringify({ version: 1, settings: s }, null, 2)],
                   { type: "application/json" },
                 ),
-                "typeflow-project.json",
+                "typing-animation-project.json",
               );
               notify("Project file saved");
             }}

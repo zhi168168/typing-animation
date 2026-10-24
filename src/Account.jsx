@@ -97,7 +97,7 @@ function PasswordField({
 }
 
 const views = {
-  login: ["Welcome back.", "Sign in to your Typeflow account."],
+  login: ["Welcome back.", "Sign in to your Typing Animation account."],
   register: [
     "Make yourself at home.",
     "Create your account. Start with your email.",
@@ -303,7 +303,7 @@ export function AccountPage() {
     <div className="account-layout">
       <nav className="account-topbar" aria-label="Account navigation">
         <a className="site-wordmark" href="/">
-          typeflow
+          Typing Animation
           <span className="wordmark-cursor" aria-hidden="true" />
         </a>
         <a className="account-back" href={returnTo}>
@@ -637,7 +637,7 @@ export function AccountPage() {
                       Resend verification email
                     </button>
                     <p>
-                      New to Typeflow?{" "}
+                      New to Typing Animation?{" "}
                       <button onClick={() => navigate("register")}>
                         Create an account
                       </button>

@@ -32,7 +32,7 @@ export function applySiteMetadata(html, origin, pathname = "/") {
   const schema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Typeflow",
+    name: "Typing Animation",
     url: `${origin}/`,
     inLanguage: "en",
   }).replaceAll("<", "\\u003c");
@@ -44,9 +44,9 @@ export function applySiteMetadata(html, origin, pathname = "/") {
     <meta data-site="true" property="og:image" content="${image}" />
     <meta data-site="true" property="og:image:width" content="1200" />
     <meta data-site="true" property="og:image:height" content="630" />
-    <meta data-site="true" property="og:image:alt" content="Typeflow typing animation generator with font, timing and export controls" />
+    <meta data-site="true" property="og:image:alt" content="Typing Animation typing animation generator with font, timing and export controls" />
     <meta data-site="true" name="twitter:image" content="${image}" />
-    <meta data-site="true" name="twitter:image:alt" content="Typeflow typing animation generator with font, timing and export controls" />
+    <meta data-site="true" name="twitter:image:alt" content="Typing Animation typing animation generator with font, timing and export controls" />
     <script data-site="true" type="application/ld+json">${schema}</script>`,
   );
 }

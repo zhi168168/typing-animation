@@ -1,4 +1,4 @@
-# Typeflow visual direction
+# Typing Animation visual direction
 
 ## Brief and constraints
 

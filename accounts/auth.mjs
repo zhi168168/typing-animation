@@ -9,15 +9,15 @@ import path from "node:path";
 export function accountEmail(kind, url) {
   const copy = {
     verify: [
-      "Verify your Typeflow email",
-      "Confirm your email address to finish creating your Typeflow account.",
+      "Verify your Typing Animation email",
+      "Confirm your email address to finish creating your Typing Animation account.",
     ],
     reset: [
-      "Reset your Typeflow password",
+      "Reset your Typing Animation password",
       "Use the link below to choose a new password. If you did not request this, ignore this email.",
     ],
     delete: [
-      "Confirm deletion of your Typeflow account",
+      "Confirm deletion of your Typing Animation account",
       "This permanently deletes your profile, linked sign-ins and sessions. Your animation project on this device is kept. Open the link within one hour, in the same browser while signed in. If you did not request this, ignore this email.",
     ],
   }[kind];
@@ -90,13 +90,13 @@ export async function createAccounts(config, options = {}) {
   const send = async (email, kind, url) => {
     if (!mailer) throw new Error("Email delivery is unavailable");
     await mailer.sendMail({
-      from: config.SMTP_FROM || "Typeflow <accounts@localhost>",
+      from: config.SMTP_FROM || "Typing Animation <accounts@localhost>",
       to: email,
       ...accountEmail(kind, url),
     });
   };
   const auth = betterAuth({
-    appName: "Typeflow",
+    appName: "Typing Animation",
     baseURL: config.origin,
     basePath: "/api/auth",
     secret,

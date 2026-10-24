@@ -20,7 +20,7 @@ const env = {
   DATABASE_URL: "postgresql://test:test@db.example/typeflow?sslmode=require",
   BETTER_AUTH_SECRET: "a-test-secret-with-more-than-thirty-two-characters",
   SMTP_HOST: "test.invalid",
-  SMTP_FROM: "Typeflow <test@test.invalid>",
+  SMTP_FROM: "Typing Animation <test@test.invalid>",
   VERCEL: "1",
 };
 

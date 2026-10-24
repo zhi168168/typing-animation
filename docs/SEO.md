@@ -1,4 +1,4 @@
-# Typeflow SEO implementation — 2026-10-22
+# Typing Animation SEO implementation — 2026-10-22
 
 ## Target and page intent
 

@@ -97,7 +97,7 @@ test("Real persistent account lifecycle: verify, sign in, edit profile, change/r
   );
   assert.equal((await call("sign-in/email", identity)).status, 403);
   assert.equal(messages.length, 1);
-  assert.equal(messages[0].subject, "Verify your Typeflow email");
+  assert.equal(messages[0].subject, "Verify your Typing Animation email");
   assert.ok(
     [200, 302].includes(
       (await service.auth.handler(new Request(emailURL(messages[0])))).status,

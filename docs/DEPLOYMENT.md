@@ -38,9 +38,9 @@ PDF 项目使用 Nodemailer + SMTP，本机未保存线上主机名。用户回�
 1. 登录 https://console.cloud.tencent.com ，在产品搜索中进入 **邮件推送 SES**，选择账户实际开通的地域。
 2. 打开 **发信域名 / 发信配置**，添加 `typing-animation.com`。
 3. 到域名 DNS 管理，逐条添加控制台要求的域名验证、SPF、DKIM 等记录，再回 SES 检查验证状态。已有邮箱的 MX 不要删除；不要给相同记录名称添加冲突的 SPF。
-4. 域名通过验证后，进入 **发信地址**，新建 `noreply@typing-animation.com`，显示名称填 `Typeflow`。
+4. 域名通过验证后，进入 **发信地址**，新建 `noreply@typing-animation.com`，显示名称填 `Typing Animation`。
 5. 找到该地址的 **SMTP 配置 / SMTP 密码**，创建或设置独立 SMTP 密码，记录 SMTP 用户名、密码和服务器地址。以控制台实际提供的地址为准；不要把腾讯云 SecretId/SecretKey 当成 SMTP 密码。
-6. 通常使用 SSL 端口 465，将控制台的 SMTP 服务器地址填入 `SMTP_HOST`，用户名填入 `SMTP_USER`，SMTP 密码填入 `SMTP_PASS`，`SMTP_FROM=Typeflow <noreply@typing-animation.com>`。
+6. 通常使用 SSL 端口 465，将控制台的 SMTP 服务器地址填入 `SMTP_HOST`，用户名填入 `SMTP_USER`，SMTP 密码填入 `SMTP_PASS`，`SMTP_FROM=Typing Animation <noreply@typing-animation.com>`。
 7. 使用腾讯云的发送测试功能先发给自己的邮箱，再到本网站测试注册验证邮件。若账户存在审核、沙箱、发信限制或欠费，先按腾讯云控制台提示处理。
 
 ### 如果原来用的是腾讯企业邮箱
@@ -67,7 +67,7 @@ PDF 项目使用 Nodemailer + SMTP，本机未保存线上主机名。用户回�
 | SMTP_PORT | `465` |
 | SMTP_USER | `resend` |
 | SMTP_PASS | Resend 新生成的 API Key |
-| SMTP_FROM | `Typeflow <noreply@typing-animation.com>` |
+| SMTP_FROM | `Typing Animation <noreply@typing-animation.com>` |
 
 这里的 noreply 是已验证域名下的发信地址，不表示已创建可收件的邮箱。若要接收用户回复，需要另设实际收件邮箱。不要使用尚未配置真实收信能力的地址充当客服。
 
@@ -75,12 +75,12 @@ PDF 项目使用 Nodemailer + SMTP，本机未保存线上主机名。用户回�
 
 1. 打开 https://console.cloud.google.com ，新建独立项目 `typing-animation`，或在已有项目中创建这个网站独立的 OAuth Client。
 2. 进入 **Google Auth Platform**（旧界面为 APIs & Services → OAuth consent screen），依次完成 Branding、Audience、Data Access、Clients 等设置。
-3. App name 填 `Typeflow`；User support email 和 Developer contact 填你实际能收信的邮箱。
+3. App name 填 `Typing Animation`；User support email 和 Developer contact 填你实际能收信的邮箱。
 4. 用户类型选 **External**。开发测试时将你自己的 Google 邮箱加入 Test users；公开使用前将应用发布为 Production，按控制台要求完成域名验证等审核。
 5. 网站首页填写 `https://typing-animation.com`。公开前准备真实的隐私政策和使用条款；仓库提供 `/privacy.html`、`/terms.html` 初稿，发布前核对实际运营情况。
 6. Authorized domains 填 `typing-animation.com`（不带 https、不带路径）。如控制台要求，使用同一 Google 账号在 Search Console 中完成域名所有权验证。
 7. Data Access 仅添加基础身份权限：`openid`、`email`、`profile`，不要添加 Gmail/Drive 等无关权限。
-8. 进入 Clients → **Create client → Web application**，名称可填 `Typeflow Web`。
+8. 进入 Clients → **Create client → Web application**，名称可填 `Typing Animation Web`。
 9. Authorized JavaScript origins 填 **`https://typing-animation.com`**。
 10. Authorized redirect URIs 填 **`https://typing-animation.com/api/auth/callback/google`**，不要加末尾斜杠，不要填 Vercel 的随机预览域名。
 11. 创建后将 Client ID 保存为 Vercel Production 的 `GOOGLE_CLIENT_ID`，Client Secret 保存为 `GOOGLE_CLIENT_SECRET`。
@@ -122,7 +122,7 @@ Set-Location D:\tools\typeflow
 node --env-file=work/production.env accounts/migrate.mjs
 ```
 
-看到 `Typeflow account schema is up to date.` 即成功。此配置由进程环境变量优先加载，不会误用本地开发 SQLite。`work/` 已被 Git 忽略。升级已有数据库前先备份、查看变更；不要拿 PDF 的生产数据库做试验。
+看到 `Typing Animation account schema is up to date.` 即成功。此配置由进程环境变量优先加载，不会误用本地开发 SQLite。`work/` 已被 Git 忽略。升级已有数据库前先备份、查看变更；不要拿 PDF 的生产数据库做试验。
 
 ## 7. 重新部署和验收
 

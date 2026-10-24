@@ -206,7 +206,7 @@ app.get("/api/exports/:id/file", (req, res) => {
   if (!j || j.status !== "done") return res.status(404).end();
   res.download(
     path.join(j.dir, `animation.${j.format}`),
-    `typeflow.${j.format}`,
+    `typing-animation.${j.format}`,
   );
 });
 app.delete("/api/exports/:id", async (req, res) => {
@@ -305,10 +305,10 @@ app.use((req, res) =>
     .set("X-Robots-Tag", "noindex")
     .type("html")
     .send(
-      '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found | Typeflow</title><h1>Page not found</h1><p><a href="/">Open the typing animation generator</a></p></html>',
+      '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Page not found | Typing Animation</title><h1>Page not found</h1><p><a href="/">Open the typing animation generator</a></p></html>',
     ),
 );
 const port = Number(process.env.PORT || 3000);
 app.listen(port, "127.0.0.1", () =>
-  console.log(`Typeflow ready: http://localhost:${port}`),
+  console.log(`Typing Animation ready: http://localhost:${port}`),
 );

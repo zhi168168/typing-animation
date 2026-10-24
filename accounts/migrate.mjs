@@ -10,4 +10,4 @@ if (!config)
   throw new Error("Configure ACCOUNT_ORIGIN before migrating accounts");
 const service = await createAccounts(config, { migrate: true });
 await service.close();
-console.log("Typeflow account schema is up to date.");
+console.log("Typing Animation account schema is up to date.");
