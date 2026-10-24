@@ -85,3 +85,19 @@ test("The editor has its own entry point and canonical URL", async () => {
     ),
   );
 });
+
+test("Search favicon is declared in static entry points and is a real square PNG", async () => {
+  for (const entry of ["index.html", "editor.html", "account.html", "public/privacy.html", "public/terms.html"]) {
+    const html = await readFile(new URL(`../${entry}`, import.meta.url), "utf8");
+    const head = html.slice(0, html.indexOf("</head>"));
+    assert.match(head, /<link\s+rel="icon"\s+type="image\/png"\s+sizes="96x96"\s+href="\/favicon-96.png"/);
+    assert.ok(!head.includes("favicon.svg"));
+  }
+  const png = await readFile(new URL("../public/favicon-96.png", import.meta.url));
+  assert.equal(png.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
+  assert.equal(png.readUInt32BE(16), 96);
+  assert.equal(png.readUInt32BE(20), 96);
+  const html = applySiteMetadata("<!-- site-metadata -->", "https://example.com");
+  assert.ok(html.includes('"url":"https://example.com/favicon-512.png"'));
+  assert.ok(!robots("https://example.com").includes("Disallow: /favicon"));
+});

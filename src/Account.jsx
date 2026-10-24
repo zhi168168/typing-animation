@@ -303,8 +303,8 @@ export function AccountPage() {
     <div className="account-layout">
       <nav className="account-topbar" aria-label="Account navigation">
         <a className="site-wordmark" href="/">
+          <img className="brand-logo" src="/logo.png" width="32" height="32" alt="" />
           Typing Animation
-          <span className="wordmark-cursor" aria-hidden="true" />
         </a>
         <a className="account-back" href={returnTo}>
           <ArrowLeft size={16} /> Back to{" "}

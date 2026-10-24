@@ -35,6 +35,18 @@ export function applySiteMetadata(html, origin, pathname = "/") {
     name: "Typing Animation",
     url: `${origin}/`,
     inLanguage: "en",
+    publisher: {
+      "@type": "Organization",
+      "@id": `${origin}/#organization`,
+      name: "Typing Animation",
+      url: `${origin}/`,
+      logo: {
+        "@type": "ImageObject",
+        url: `${origin}/favicon-512.png`,
+        width: 512,
+        height: 512,
+      },
+    },
   }).replaceAll("<", "\\u003c");
   return html.replace(
     "<!-- site-metadata -->",
@@ -42,6 +54,7 @@ export function applySiteMetadata(html, origin, pathname = "/") {
     <link data-site="true" rel="canonical" href="${url}" />
     <meta data-site="true" property="og:url" content="${url}" />
     <meta data-site="true" property="og:image" content="${image}" />
+    <meta data-site="true" property="og:image:type" content="image/png" />
     <meta data-site="true" property="og:image:width" content="1200" />
     <meta data-site="true" property="og:image:height" content="630" />
     <meta data-site="true" property="og:image:alt" content="Typing Animation typing animation generator with font, timing and export controls" />

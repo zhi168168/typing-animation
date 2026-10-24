@@ -20,6 +20,12 @@ nav {
   margin-bottom: 56px;
   font-size: 14px;
 }
+.legal-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #efedf5;
+}
 h1 {
   font-size: 36px;
   letter-spacing: -1px;

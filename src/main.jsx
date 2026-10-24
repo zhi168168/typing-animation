@@ -470,7 +470,7 @@ function App() {
           aria-label="Back to home"
           title="Back to home"
         >
-          <Keyboard size={19} strokeWidth={1.6} />
+          <img className="brand-logo" src="/logo.png" width="28" height="28" alt="" />
           <span>Editor</span>
         </a>
         <div className="header-divider" />
