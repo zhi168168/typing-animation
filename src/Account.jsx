@@ -9,6 +9,7 @@ import {
   LogOut,
 } from "lucide-react";
 import "./account.css";
+import { BillingPanel } from "./BillingPanel.jsx";
 
 export async function accountAPI(path, data) {
   const response = await fetch(`/api/auth/${path}`, {
@@ -317,7 +318,13 @@ export function AccountPage() {
     <div className="account-layout">
       <nav className="account-topbar" aria-label="Account navigation">
         <a className="site-wordmark" href="/">
-          <img className="brand-logo" src="/logo.png" width="32" height="32" alt="" />
+          <img
+            className="brand-logo"
+            src="/logo.png"
+            width="32"
+            height="32"
+            alt=""
+          />
           Typing Animation
         </a>
         <a className="account-back" href={returnTo}>
@@ -441,6 +448,7 @@ export function AccountPage() {
                 </fieldset>
               </form>
             </section>
+            <BillingPanel />
             <div className="account-profile-actions">
               <button
                 className="account-secondary"
@@ -689,7 +697,9 @@ export function AccountPage() {
         )}
         <p className="account-footnote">
           Your animation project stays in this browser. Sign in to download.{" "}
-          <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/pricing.html">Pricing</a>
+          <a href="/about.html">About</a> · <a href="/contact.html">Contact</a>{" "}
+          · <a href="/privacy.html">Privacy</a> ·{" "}
+          <a href="/terms.html">Terms</a> · <a href="/pricing.html">Pricing</a>
           <br />Customer support: <a href="mailto:zhihaosong168@gmail.com">zhihaosong168@gmail.com</a>
         </p>
         {config?.localMailbox && view !== "mailbox" && (

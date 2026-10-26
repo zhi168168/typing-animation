@@ -57,6 +57,8 @@ import { Button } from "./controls";
 import { SettingsPanel } from "./SettingsPanel";
 import { AccountLink, AccountPage } from "./Account";
 import { requireDownloadSession } from "./download-access.js";
+import { requireDownloadPayment } from "./billing.js";
+import { BillingPanel } from "./BillingPanel.jsx";
 
 function pendingDownload() {
   try {
@@ -192,6 +194,11 @@ function App() {
   };
   const notify = (msg) => setToast(msg);
   function downloadError(error, requestedFormat = format) {
+    if (error.code === "PAYMENT_REQUIRED") {
+      setModal("export");
+      notify(error.message);
+      return;
+    }
     if (error.code === "SIGN_IN_REQUIRED") {
       try {
         localStorage.setItem("typeflow-project", JSON.stringify(s));
@@ -471,9 +478,10 @@ function App() {
     if (recording)
       return notify("Stop recording your typing rhythm before exporting.");
     setPlaying(false);
-    setProgress({ percent: 0, message: "Checking sign-in…" });
+    setProgress({ percent: 0, message: "Checking download access…" });
     try {
       await requireDownloadSession();
+      await requireDownloadPayment();
     } catch (error) {
       downloadError(error);
       setProgress(null);
@@ -772,7 +780,7 @@ function App() {
           <footer className="workspace-footer">
             <span>
               <span className="local-dot" />
-              Free to edit · Sign in to download
+              Free to edit · Downloads from $1.90
             </span>
             <Button
               className="text-button"
@@ -879,7 +887,7 @@ function App() {
                   {
                     {
                       export:
-                        "Choose a format. Sign in to download; your project stays saved.",
+                        "Choose a format and download plan. Your project stays saved.",
                       templates:
                         "Choose a starting point and make the words your own.",
                       help: "Go from text to animation in a few steps.",
@@ -910,6 +918,16 @@ function App() {
             )}
             {modal === "export" && (
               <>
+                <BillingPanel
+                  onError={downloadError}
+                  beforeCheckout={() => {
+                    localStorage.setItem("typeflow-project", JSON.stringify(s));
+                    sessionStorage.setItem(
+                      "typeflow-pending-download",
+                      JSON.stringify({ format, ms, created: Date.now() }),
+                    );
+                  }}
+                />
                 <div className="format-grid">
                   {[
                     {

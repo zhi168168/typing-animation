@@ -3,8 +3,15 @@
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
-  "functions": { "api/account.mjs": { "maxDuration": 60 } },
+  "functions": {
+    "api/account.mjs": { "maxDuration": 60 },
+    "api/billing.mjs": { "maxDuration": 60 }
+  },
   "rewrites": [
+    {
+      "source": "/api/billing/:path*",
+      "destination": "/api/billing?__billingPath=:path*"
+    },
     {
       "source": "/api/auth/:path*",
       "destination": "/api/account?__authPath=:path*"

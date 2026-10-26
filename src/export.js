@@ -2,9 +2,13 @@ import { dimensions, timeline, render } from "./engine";
 import engineSource from "./engine.js?raw";
 import { ensureFonts, embeddedFontCSS, selectedFont } from "./font-loader.js";
 import { requireDownloadSession } from "./download-access.js";
+import { billingAPI } from "./billing.js";
 import { renderKeyboardAudio } from "./audio.js";
-export async function download(blob, name) {
+export async function download(blob, name, serverPaid = false) {
   await requireDownloadSession();
+  // Project backups remain free; charge only for finished animation files.
+  if (!name.endsWith(".json") && !serverPaid)
+    await billingAPI("consume", { downloadId: crypto.randomUUID() });
   const url = URL.createObjectURL(blob),
     a = document.createElement("a");
   a.href = url;
@@ -145,7 +149,7 @@ export async function videoExport(
     }
     const r = await fetch(`/api/exports/${id}/file`, { signal });
     if (!r.ok) throw new Error("File download failed");
-    await download(await r.blob(), `typing-animation.${format}`);
+    await download(await r.blob(), `typing-animation.${format}`, true);
   } finally {
     if (id)
       await fetch(`/api/exports/${id}`, { method: "DELETE" }).catch(() => {});

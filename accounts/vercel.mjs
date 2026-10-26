@@ -2,6 +2,8 @@ import express from "express";
 import { accountConfig } from "./config.mjs";
 import { createAccounts } from "./auth.mjs";
 import { capabilities, mountAccounts } from "./http.mjs";
+import { createBilling } from "../billing/service.mjs";
+import { mountBilling } from "../billing/http.mjs";
 
 export function createVercelHandler({
   env = process.env,
@@ -15,6 +17,7 @@ export function createVercelHandler({
       await service.auth.$context;
       const app = express();
       mountAccounts(app, config, service, { vercel: env.VERCEL === "1" });
+      mountBilling(app, service, config, createBilling(service, config, env));
       return app;
     } catch {
       await service?.close().catch(() => {});

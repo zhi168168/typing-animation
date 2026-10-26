@@ -5,6 +5,8 @@ import nodemailer from "nodemailer";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { randomBytes, randomUUID } from "node:crypto";
 import path from "node:path";
+import { APIError } from "better-auth/api";
+import { BillingStore } from "../billing/store.mjs";
 
 export function accountEmail(kind, url) {
   const copy = {
@@ -143,6 +145,24 @@ export async function createAccounts(config, options = {}) {
     user: {
       deleteUser: {
         enabled: config.email,
+        beforeDelete: async (user) => {
+          if (!config.WAFFO_MERCHANT_ID) return;
+          const rows = await new BillingStore(database, config.local).query(
+            "SELECT * FROM billing_orders WHERE user_id=$1 AND plan='monthly'",
+            [user.id],
+          );
+          if (
+            rows.some(
+              (row) =>
+                row.provider_id &&
+                ["pending", "active", "past_due"].includes(row.state),
+            )
+          )
+            throw new APIError("BAD_REQUEST", {
+              message:
+                "Cancel your subscription through Manage subscription before deleting your account.",
+            });
+        },
         deleteTokenExpiresIn: 3600,
         sendDeleteAccountVerification: async ({ user, url }) =>
           send(user.email, "delete", url),

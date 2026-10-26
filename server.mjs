@@ -10,6 +10,8 @@ import { accountConfig } from "./accounts/config.mjs";
 import { createAccounts } from "./accounts/auth.mjs";
 import { mountAccounts } from "./accounts/http.mjs";
 import { exportAccess } from "./accounts/export-access.mjs";
+import { createBilling } from "./billing/service.mjs";
+import { mountBilling } from "./billing/http.mjs";
 const ffmpeg = createRequire(import.meta.url).resolve(
   "@ffmpeg-installer/win32-x64/ffmpeg.exe",
 );
@@ -33,6 +35,12 @@ const accountService = accountSettings
   ? await createAccounts(accountSettings)
   : null;
 mountAccounts(app, accountSettings, accountService);
+const billing = createBilling(accountService, accountSettings, {
+  ...env,
+  ...process.env,
+});
+if (billing && accountSettings.local) await billing.store.migrate();
+mountBilling(app, accountService, accountSettings, billing);
 app.get("/robots.txt", (req, res) =>
   res.type("text/plain").send(robots(origin)),
 );
@@ -57,7 +65,7 @@ app.get(/^\/editor(?:\/|\.html)$/, (req, res) => {
     `/editor${req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : ""}`,
   );
 });
-app.use("/api/exports", exportAccess(accountService, jobs));
+app.use("/api/exports", exportAccess(accountService, jobs, billing));
 app.use(express.json({ limit: "1mb" }));
 app.post("/api/exports", async (req, res) => {
   const { fps, format, width, height, frames, transparent } = req.body;
@@ -239,9 +247,18 @@ app.get("/api/exports/:id", (req, res) => {
       j.status === "error" ? "Video encoding failed. Please try again." : null,
   });
 });
-app.get("/api/exports/:id/file", (req, res) => {
+app.get("/api/exports/:id/file", async (req, res) => {
   const j = jobs.get(req.params.id);
   if (!j || j.status !== "done") return res.status(404).end();
+  try {
+    if (!billing || !(await billing.store.consume(req.exportUserId, j.id)))
+      return res
+        .status(402)
+        .json({ error: "Choose a download plan to continue" });
+    j.paid = true;
+  } catch {
+    return res.status(503).json({ error: "Payment service is unavailable" });
+  }
   res.download(
     path.join(j.dir, `animation.${j.format}`),
     `typing-animation.${j.format}`,
