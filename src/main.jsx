@@ -597,6 +597,7 @@ function App() {
           <Button
             className="primary-button"
             icon={Download}
+            data-analytics-event="export_animation_click"
             onClick={() => setModal("export")}
           >
             Export animation

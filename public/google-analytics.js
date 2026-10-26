@@ -3,21 +3,41 @@
   const measurementId = "G-FZKLY4DMFE";
   const choiceKey = "typing-animation-analytics-consent-v1";
   let loaded = false;
+  let editorViewSent = false;
   let choice = null;
   try { choice = localStorage.getItem(choiceKey); } catch {}
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
-  const pageURL = (value) => {
-    try { const url = new URL(value); return url.origin + url.pathname; }
+  const pageURL = (value, withCampaign = false) => {
+    try {
+      const url = new URL(value);
+      const clean = new URL(url.origin + url.pathname);
+      if (withCampaign) {
+        for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_id", "utm_content", "utm_term"]) {
+          const tag = url.searchParams.get(key);
+          // Never forward arbitrary queries, account/payment tokens or email addresses.
+          if (tag && /^[a-zA-Z0-9_.~ -]{1,100}$/.test(tag)) clean.searchParams.set(key, tag);
+        }
+      }
+      return clean.href;
+    }
     catch { return ""; }
   };
+  const isEditor = () => ["/editor", "/editor/", "/editor.html"].includes(new URL(location.href).pathname);
+  function trackEditorEvent(name) {
+    if (choice !== "allowed" || !loaded || !isEditor()) return;
+    window.gtag("event", name, {
+      page_path: "/editor",
+      ...(name === "export_animation_click" ? { button_location: "editor_toolbar" } : {}),
+    });
+  }
   function startAnalytics() {
     window[`ga-disable-${measurementId}`] = false;
     if (loaded) return;
     loaded = true;
     window.gtag("js", new Date());
     window.gtag("config", measurementId, {
-      page_location: pageURL(location.href),
+      page_location: pageURL(location.href, true),
       page_referrer: pageURL(document.referrer),
       allow_google_signals: false,
       allow_ad_personalization_signals: false,
@@ -26,6 +46,10 @@
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
     document.head.appendChild(script);
+    if (isEditor() && !editorViewSent) {
+      editorViewSent = true;
+      trackEditorEvent("editor_view");
+    }
   }
   function clearAnalyticsCookies() {
     for (const part of document.cookie.split(";")) {
@@ -74,6 +98,8 @@
   }
   document.addEventListener("click", (event) => {
     if (event.target.closest?.("[data-privacy-settings]")) showSettings();
+    const button = event.target.closest?.('[data-analytics-event="export_animation_click"]');
+    if (button && !button.disabled) trackEditorEvent("export_animation_click");
   });
   if (choice === "allowed") startAnalytics();
   else window[`ga-disable-${measurementId}`] = true;
