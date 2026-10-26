@@ -48,3 +48,14 @@ footer {
   padding-top: 24px;
   border-top: 1px solid #2b2930;
 }
+
+/* Public plans and contact information. */
+nav { flex-wrap: wrap; }
+.pricing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin: 28px 0; }
+.price-card { border: 1px solid #45404e; border-radius: 12px; padding: 22px; }
+.price-card h2 { margin-top: 0; }
+.plan-price { font-size: 32px; color: #efedf5; line-height: 1.4; }
+.plan-price small { display: block; font-size: 14px; }
+.price-card ul { padding-left: 20px; }
+.plan-link { display: inline-block; padding: 8px 14px; border: 1px solid #c5b4f1; border-radius: 8px; }
+@media (max-width: 600px) { .pricing-grid { grid-template-columns: 1fr; } }

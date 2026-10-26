@@ -781,6 +781,10 @@ function App() {
             >
               Import project
             </Button>
+            <div className="workspace-contact">
+              <a href="/pricing.html">Pricing</a>
+              <span>Customer support: <a href="mailto:zhihaosong168@gmail.com">zhihaosong168@gmail.com</a></span>
+            </div>
           </footer>
         </div>
         <aside className="inspector">

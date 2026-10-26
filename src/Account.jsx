@@ -689,7 +689,8 @@ export function AccountPage() {
         )}
         <p className="account-footnote">
           Your animation project stays in this browser. Sign in to download.{" "}
-          <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a>
+          <a href="/about.html">About</a> · <a href="/contact.html">Contact</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/pricing.html">Pricing</a>
+          <br />Customer support: <a href="mailto:zhihaosong168@gmail.com">zhihaosong168@gmail.com</a>
         </p>
         {config?.localMailbox && view !== "mailbox" && (
           <a

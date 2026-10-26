@@ -1104,3 +1104,7 @@ svg {
     min-height: 540px;
   }
 }
+
+.workspace-footer { flex-wrap: wrap; gap: 10px; }
+.workspace-contact { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 11px; }
+.workspace-contact a { color: var(--accent); overflow-wrap: anywhere; }

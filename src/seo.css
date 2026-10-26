@@ -226,3 +226,5 @@ body {
     flex-direction: column;
   }
 }
+
+.footer-contact { flex-basis: 100%; margin: 0; overflow-wrap: anywhere; }

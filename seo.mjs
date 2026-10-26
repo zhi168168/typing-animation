@@ -76,6 +76,6 @@ export function robots(origin) {
 }
 
 export function sitemap(origin) {
-  const paths = ["/", "/editor", "/about.html", "/contact.html"];
+  const paths = ["/", "/editor", "/about.html", "/contact.html", "/pricing.html"];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map((pathname) => `<url><loc>${escapeAttribute(origin)}${pathname}</loc></url>`).join("")}</urlset>\n`;
 }
