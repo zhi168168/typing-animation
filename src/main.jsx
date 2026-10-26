@@ -927,120 +927,111 @@ function App() {
                       JSON.stringify({ format, ms, created: Date.now() }),
                     );
                   }}
-                />
-                <div className="format-grid">
-                  {[
-                    {
-                      id: "webm",
-                      name: "WebM video",
-                      desc: "Supports transparency",
-                      icon: Film,
-                    },
-                    {
-                      id: "mp4",
-                      name: "MP4 video",
-                      desc: "For sharing and editing",
-                      icon: Film,
-                    },
-                    {
-                      id: "html",
-                      name: "HTML animation",
-                      desc: "Standalone, offline playback",
-                      icon: Code2,
-                    },
-                    {
-                      id: "png",
-                      name: "PNG image",
-                      desc: "Save the current frame",
-                      icon: Image,
-                    },
-                  ].map((f) => (
-                    <button
-                      disabled={
-                        !!progress ||
-                        (f.id === "mp4" && s.background === "transparent")
-                      }
-                      key={f.id}
-                      onClick={() => setFormat(f.id)}
-                      className={`format-option ${format === f.id ? "selected" : ""}`}
-                    >
-                      <f.icon size={21} />
-                      <strong>{f.name}</strong>
-                      <span>{f.desc}</span>
-                      {format === f.id && <Check size={15} />}
-                    </button>
-                  ))}
-                </div>
-                {format === "mp4" && s.background === "transparent" && (
-                  <div className="info-note">
-                    MP4 does not support transparency. Choose WebM or change the
-                    background.
-                  </div>
-                )}
-                <div className="export-summary">
-                  <span>
-                    {dims[0]} × {dims[1]}
-                  </span>
-                  <span>{s.fps} FPS</span>
-                  <span>{(t.duration / 1000).toFixed(2)} s</span>
-                  <span>
-                    {s.background === "transparent"
-                      ? "Transparent background"
-                      : "Colored background"}
-                  </span>
-                </div>
-                <p className="export-note">
-                  {format === "webm"
-                    ? "WebM alpha support varies between video editors. Check compatibility before importing."
-                    : format === "html"
-                      ? "Includes the animation, settings and selected open-source fonts for offline playback."
-                      : format === "png"
-                        ? "Exports the current frame. Scrub the timeline to choose a frame before exporting."
-                        : "Uses H.264 for compatibility with most video players and editors."}
-                  {format !== "png" &&
-                    (sound
-                      ? ` Includes ${soundOptions.find((option) => option.id === soundPack)?.label || "selected keyboard"} typing sounds.`
-                      : " Typing sounds are muted in this export.")}
-                  {format === "html" &&
-                    sound &&
-                    " Click Play in the exported page to start with sound."}
-                </p>
-                {progress ? (
-                  <div className="export-progress">
-                    <div>
-                      <Loader2 size={16} className="spin" />
-                      {progress.message}
-                      <span>{progress.percent}%</span>
-                    </div>
-                    <progress max="100" value={progress.percent} />
-                    <Button
-                      className="quiet-button"
-                      onClick={() => abort.current?.abort()}
-                    >
-                      Cancel export
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    className="primary-button export-cta"
-                    icon={Download}
-                    disabled={
-                      (format === "mp4" && s.background === "transparent") ||
-                      recording
-                    }
-                    onClick={doExport}
-                  >
-                    Export
-                    {
+                  onExport={doExport}
+                  format={format}
+                  disabled={
+                    !!progress ||
+                    recording ||
+                    (format === "mp4" && s.background === "transparent")
+                  }
+                  progressContent={
+                    progress ? (
+                      <div className="export-progress">
+                        <div>
+                          <Loader2 size={16} className="spin" />
+                          {progress.message}
+                          <span>{progress.percent}%</span>
+                        </div>
+                        <progress max="100" value={progress.percent} />
+                        <Button
+                          className="quiet-button"
+                          onClick={() => abort.current?.abort()}
+                        >
+                          Cancel export
+                        </Button>
+                      </div>
+                    ) : null
+                  }
+                >
+                  <h3 className="export-step">1. Choose a format</h3>
+                  <div className="format-grid">
+                    {[
                       {
-                        webm: " WebM",
-                        mp4: " MP4",
-                        html: " HTML",
-                        png: " PNG",
-                      }[format]
-                    }
-                  </Button>
-                )}
+                        id: "webm",
+                        name: "WebM video",
+                        desc: "Supports transparency",
+                        icon: Film,
+                      },
+                      {
+                        id: "mp4",
+                        name: "MP4 video",
+                        desc: "For sharing and editing",
+                        icon: Film,
+                      },
+                      {
+                        id: "html",
+                        name: "HTML animation",
+                        desc: "Standalone, offline playback",
+                        icon: Code2,
+                      },
+                      {
+                        id: "png",
+                        name: "PNG image",
+                        desc: "Save the current frame",
+                        icon: Image,
+                      },
+                    ].map((f) => (
+                      <button
+                        disabled={
+                          !!progress ||
+                          (f.id === "mp4" && s.background === "transparent")
+                        }
+                        key={f.id}
+                        onClick={() => setFormat(f.id)}
+                        className={`format-option ${format === f.id ? "selected" : ""}`}
+                      >
+                        <f.icon size={21} />
+                        <strong>{f.name}</strong>
+                        <span>{f.desc}</span>
+                        {format === f.id && <Check size={15} />}
+                      </button>
+                    ))}
+                  </div>
+                  {format === "mp4" && s.background === "transparent" && (
+                    <div className="info-note">
+                      MP4 does not support transparency. Choose WebM or change
+                      the background.
+                    </div>
+                  )}
+                  <div className="export-summary">
+                    <span>
+                      {dims[0]} × {dims[1]}
+                    </span>
+                    <span>{s.fps} FPS</span>
+                    <span>{(t.duration / 1000).toFixed(2)} s</span>
+                    <span>
+                      {s.background === "transparent"
+                        ? "Transparent background"
+                        : "Colored background"}
+                    </span>
+                  </div>
+                  <p className="export-note">
+                    {format === "webm"
+                      ? "WebM alpha support varies between video editors. Check compatibility before importing."
+                      : format === "html"
+                        ? "Includes the animation, settings and selected open-source fonts for offline playback."
+                        : format === "png"
+                          ? "Exports the current frame. Scrub the timeline to choose a frame before exporting."
+                          : "Uses H.264 for compatibility with most video players and editors."}
+                    {format !== "png" &&
+                      (sound
+                        ? ` Includes ${soundOptions.find((option) => option.id === soundPack)?.label || "selected keyboard"} typing sounds.`
+                        : " Typing sounds are muted in this export.")}
+                    {format === "html" &&
+                      sound &&
+                      " Click Play in the exported page to start with sound."}
+                  </p>
+                </BillingPanel>
               </>
             )}
             {modal === "help" && (
