@@ -6,7 +6,7 @@ export { billingConfig } from "./config.mjs";
 
 export const plans = {
   single: { amount: "1.90", name: "One animation download" },
-  monthly: { amount: "9.90", name: "Unlimited monthly downloads" },
+  monthpass: { amount: "9.90", name: "One month of unlimited downloads" },
 };
 export function checkoutURL(value) {
   const url = new URL(value);
@@ -42,11 +42,31 @@ export function subscriptionUntil(order, now = Date.now()) {
     ? end
     : 0;
 }
+// Calendar month in UTC, clamped to the last day of the following month.
+// Anchor to Waffo's successful payment record, so retries/reconciliation never
+// extend access and a delayed webhook does not create a fresh month.
+export function monthPassUntil(order, now = Date.now()) {
+  if (order.status !== "completed") return 0;
+  const timestamps = (order.payments || [])
+    .filter((p) => paid(p, "9.90"))
+    .map((p) => Date.parse(p.createdAt))
+    .filter((time) => Number.isFinite(time) && time <= now);
+  if (!timestamps.length) return 0;
+  const date = new Date(Math.min(...timestamps));
+  const day = date.getUTCDate();
+  date.setUTCDate(1);
+  date.setUTCMonth(date.getUTCMonth() + 1);
+  const lastDay = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  date.setUTCDate(Math.min(day, lastDay));
+  return date.getTime();
+}
 export const orderFields = `id storeId status currency testMode merchantProvidedBuyerIdentity orderMerchantExternalId
-  productVersion {productId} payments {id status periodNumber refundStatus isFullyRefunded amount {display currency}}
+  productVersion {productId} payments {id status periodNumber refundStatus isFullyRefunded createdAt amount {display currency}}
 `;
 export function orderQuery(plan) {
-  const type = plan === "single" ? "onetimeOrders" : "subscriptionOrders";
+  const type = plan === "monthly" ? "subscriptionOrders" : "onetimeOrders";
   return `query($storeId:String!, $ref:String!) { ${type}(storeId:$storeId, filter:{orderMerchantExternalId:{eq:$ref}},limit:2) {
     ${orderFields} ${plan === "monthly" ? "billingPeriod isInTrial currentPeriodStart currentPeriodEnd currentPeriodNumber" : ""}
   } }`;
@@ -58,7 +78,7 @@ export function createBilling(accounts, settings, env, options = {}) {
     !accounts ||
     !config.storeId ||
     !config.singleProductId ||
-    !config.monthlyProductId
+    !config.monthPassProductId
   )
     return null;
   const client = options.client || new WaffoPancake(config);
@@ -81,7 +101,7 @@ export function createBilling(accounts, settings, env, options = {}) {
           throw new Error("Payment query failed");
         const rows =
           result.data[
-            row.plan === "single" ? "onetimeOrders" : "subscriptionOrders"
+            row.plan === "monthly" ? "subscriptionOrders" : "onetimeOrders"
           ];
         if (!rows?.length) return null;
         if (rows.length !== 1) throw new Error("Ambiguous payment reference");
@@ -95,7 +115,12 @@ export function createBilling(accounts, settings, env, options = {}) {
           order.currency !== "USD"
         )
           throw new Error("Payment identity mismatch");
-        const valid = row.plan === "monthly" ? subscriptionUntil(order) : 0;
+        const valid =
+          row.plan === "monthly"
+            ? subscriptionUntil(order)
+            : row.plan === "monthpass"
+              ? monthPassUntil(order)
+              : 0;
         const credited =
           row.plan === "single" &&
           order.status === "completed" &&
@@ -116,19 +141,23 @@ export function createBilling(accounts, settings, env, options = {}) {
           [user.id, config.environment],
         );
         if (
-          plan === "monthly" &&
+          plan === "monthpass" &&
           rows.some(
             (r) =>
-              r.plan === plan &&
-              ["active", "canceling", "past_due"].includes(r.state),
+              ["monthly", "monthpass"].includes(r.plan) &&
+              Number(r.valid_until) > Date.now(),
           )
         )
           throw new Error(
-            "Manage your existing subscription before starting another.",
+            "Your unlimited access is still active. Buy another month after it expires.",
           );
         let row = rows.find(
           (r) =>
             r.plan === plan &&
+            r.product_id ===
+              (plan === "single"
+                ? config.singleProductId
+                : config.monthPassProductId) &&
             r.state === "pending" &&
             (Number(r.session_expires) > Date.now() || !r.checkout_url),
         );
@@ -146,7 +175,7 @@ export function createBilling(accounts, settings, env, options = {}) {
               config.environment,
               plan === "single"
                 ? config.singleProductId
-                : config.monthlyProductId,
+                : config.monthPassProductId,
             ],
           );
         }
@@ -158,7 +187,7 @@ export function createBilling(accounts, settings, env, options = {}) {
           productId:
             plan === "single"
               ? config.singleProductId
-              : config.monthlyProductId,
+              : config.monthPassProductId,
           currency: "USD",
           buyerIdentity: user.id,
           buyerEmail: user.email,
@@ -179,7 +208,7 @@ export function createBilling(accounts, settings, env, options = {}) {
     },
     async refresh(userId) {
       const rows = await store.query(
-        "SELECT * FROM billing_orders WHERE user_id=$1 AND mode=$2 AND (state='pending' OR plan='monthly') ORDER BY created DESC",
+        "SELECT * FROM billing_orders WHERE user_id=$1 AND mode=$2 AND (state='pending' OR plan IN ('monthly','monthpass')) ORDER BY created DESC",
         [userId, config.environment],
       );
       for (const row of rows) await service.reconcile(row);

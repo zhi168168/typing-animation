@@ -7,11 +7,9 @@ export function mountBilling(app, accounts, settings, billing) {
   app.use("/api/billing", (req, res, next) => {
     res.set("Cache-Control", "no-store");
     if (!billing)
-      return res
-        .status(503)
-        .json({
-          error: "Payments are not available yet. Your project is saved.",
-        });
+      return res.status(503).json({
+        error: "Payments are not available yet. Your project is saved.",
+      });
     if (
       req.path !== "/webhook" &&
       req.headers.origin &&
@@ -93,7 +91,7 @@ export function mountBilling(app, accounts, settings, billing) {
     }
   });
   app.post("/api/billing/checkout", async (req, res, next) => {
-    if (!["single", "monthly"].includes(req.body.plan))
+    if (!["single", "monthpass"].includes(req.body.plan))
       return res.status(400).json({ error: "Invalid plan" });
     try {
       res.json(await billing.checkout(req.billingUser, req.body.plan));
@@ -145,11 +143,9 @@ export function mountBilling(app, accounts, settings, billing) {
   });
   app.use("/api/billing", (error, req, res, next) => {
     if (res.headersSent) return next(error);
-    res
-      .status(error.type === "entity.too.large" ? 413 : 503)
-      .json({
-        error:
-          "Payment service could not complete the request. Please retry; your order is kept to prevent duplicate charges.",
-      });
+    res.status(error.type === "entity.too.large" ? 413 : 503).json({
+      error:
+        "Payment service could not complete the request. Please retry; your order is kept to prevent duplicate charges.",
+    });
   });
 }

@@ -111,7 +111,7 @@ export function BillingPanel({
             </strong>
             <span>
               {unlimited
-                ? `Unlimited until ${new Date(status.unlimitedUntil).toLocaleDateString()}`
+                ? `Unlimited until ${new Date(status.unlimitedUntil).toLocaleString()}`
                 : status?.credits
                   ? `${status.credits} download${status.credits === 1 ? "" : "s"} available`
                   : "Edit and preview for free"}
@@ -139,17 +139,17 @@ export function BillingPanel({
               </button>
               <button
                 type="button"
-                disabled={locked || status?.hasSubscription}
-                aria-pressed={plan === "monthly"}
+                disabled={locked}
+                aria-pressed={plan === "monthpass"}
                 onClick={() => {
-                  setPlan("monthly");
+                  setPlan("monthpass");
                   setAgreed(false);
                 }}
               >
                 <strong>
-                  $9.90 <small>/ month</small>
+                  $9.90 <small>/ 1 month</small>
                 </strong>
-                <span>Unlimited downloads · renews monthly</span>
+                <span>Unlimited downloads · no auto-renewal</span>
               </button>
             </div>
           )}
@@ -171,15 +171,10 @@ export function BillingPanel({
                   <a href="/privacy.html" target="_blank" rel="noopener">
                     Privacy Policy
                   </a>
-                  .{" "}
-                  {plan === "monthly"
-                    ? "I authorize $9.90 USD each month until I cancel through Manage subscription."
-                    : "One file download. No recurring charge."}{" "}
-                  Applicable taxes are shown at checkout.
+                  .
                 </span>
               </label>
               <p className="billing-policy">
-                7-day refund: first subscription or unused single download.{" "}
                 <a href="/terms.html#refunds" target="_blank" rel="noopener">
                   Refund policy
                 </a>{" "}
@@ -237,14 +232,14 @@ export function BillingPanel({
                     ? "Checking download access…"
                     : entitled && onExport
                       ? `Export ${format?.toUpperCase()}`
-                      : `Continue to checkout · $${plan === "monthly" ? "9.90 / month" : "1.90"}`}
+                      : `Continue to checkout · $${plan === "monthpass" ? "9.90" : "1.90"}`}
               </button>
               <p className="checkout-caption">
                 {entitled && onExport
                   ? unlimited
-                    ? "Your subscription includes this export."
+                    ? "Your unlimited access includes this export."
                     : "Uses 1 download credit."
-                  : "Secure checkout by Waffo · Return here to export after payment"}
+                  : "One-time payment · Taxes shown at Waffo checkout"}
               </p>
             </>
           )}

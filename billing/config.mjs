@@ -23,5 +23,12 @@ export function billingConfig(env) {
     storeId: env.WAFFO_STORE_ID || "",
     singleProductId: env.WAFFO_SINGLE_PRODUCT_ID || "",
     monthlyProductId: env.WAFFO_MONTHLY_PRODUCT_ID || "",
+    // Product IDs are public catalog references, not credentials. Keep the old
+    // subscription ID only to reconcile purchases made before the month pass.
+    monthPassProductId:
+      env.WAFFO_MONTH_PASS_PRODUCT_ID ||
+      (env.WAFFO_STORE_ID === "STO_5ljWhy4WDd1PUstxt8TaVK"
+        ? "PROD_3y1N1HyByVrrxr4WyTV83e"
+        : ""),
   };
 }

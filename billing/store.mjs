@@ -96,7 +96,7 @@ export class BillingStore {
       unlimitedUntil: Math.max(
         0,
         ...rows
-          .filter((r) => r.plan === "monthly")
+          .filter((r) => ["monthly", "monthpass"].includes(r.plan))
           .map((r) => Number(r.valid_until)),
       ),
       hasSubscription: rows.some(
@@ -122,7 +122,9 @@ export class BillingStore {
       );
       if (
         !rows.some(
-          (r) => r.plan === "monthly" && Number(r.valid_until) > Date.now(),
+          (r) =>
+            ["monthly", "monthpass"].includes(r.plan) &&
+            Number(r.valid_until) > Date.now(),
         )
       ) {
         const credit = rows.find(

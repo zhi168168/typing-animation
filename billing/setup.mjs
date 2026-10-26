@@ -38,24 +38,20 @@ if (!single)
     },
     { idempotencyKey: `${config.merchantId}-typeflow-single-v1` },
   ));
-let monthly = store.subscriptionProducts.find(
-  (p) =>
-    p.billingPeriod === "monthly" &&
-    matches(p, 9.9) &&
-    !Number(p.prices.find((x) => x.currency === "USD")?.priceInfo.trialAmount),
+let monthPass = store.onetimeProducts.find(
+  (p) => matches(p, 9.9) && p.name === "Typing Animation — One Month Pass",
 );
-if (!monthly)
-  ({ product: monthly } = await client.subscriptionProducts.create(
+if (!monthPass)
+  ({ product: monthPass } = await client.onetimeProducts.create(
     {
       storeId,
-      name: "Typing Animation — Unlimited Monthly",
+      name: "Typing Animation — One Month Pass",
       description:
-        "Unlimited animation downloads during each paid month. Renews monthly; cancel anytime.",
-      billingPeriod: "monthly",
+        "One-time payment for one calendar month of unlimited animation downloads. No automatic renewal. Buy again after expiry.",
       prices: { USD: { amount: "9.90", taxCategory: "saas" } },
-      metadata: { app: "typeflow", plan: "monthly" },
+      metadata: { app: "typeflow", plan: "monthpass", renewal: "none" },
     },
-    { idempotencyKey: `${config.merchantId}-typeflow-monthly-v1` },
+    { idempotencyKey: `${config.merchantId}-typeflow-monthpass-v1` },
   ));
 // Preserve every secret and existing unrelated local setting. Canonicalize duplicate env keys.
 const file = ".env.local";
@@ -64,7 +60,7 @@ const updates = {
   WAFFO_ENVIRONMENT: "test",
   WAFFO_STORE_ID: storeId,
   WAFFO_SINGLE_PRODUCT_ID: single.id,
-  WAFFO_MONTHLY_PRODUCT_ID: monthly.id,
+  WAFFO_MONTH_PASS_PRODUCT_ID: monthPass.id,
 };
 for (const [key, value] of Object.entries(updates)) {
   text = text
@@ -80,7 +76,7 @@ console.log(
     store: store.name,
     storeId,
     single: single.id,
-    monthly: monthly.id,
+    monthPass: monthPass.id,
     productionEnabled: store.prodEnabled,
   }),
 );

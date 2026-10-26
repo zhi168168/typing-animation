@@ -10,6 +10,7 @@ import {
   billingConfig,
   createBilling,
   subscriptionUntil,
+  monthPassUntil,
 } from "../billing/service.mjs";
 import { mountBilling } from "../billing/http.mjs";
 
@@ -21,6 +22,7 @@ const env = {
   WAFFO_STORE_ID: "STO_5ljWhy4WDd1PUstxt8TaVK",
   WAFFO_SINGLE_PRODUCT_ID: "PROD_033xWaTJyyefzSTSHFeqrJ",
   WAFFO_MONTHLY_PRODUCT_ID: "PROD_1kPrylh47TRnfZ4WYR7POG",
+  WAFFO_MONTH_PASS_PRODUCT_ID: "PROD_test_monthpass",
 };
 async function fixture(t) {
   const db = new DatabaseSync(":memory:");
@@ -41,6 +43,7 @@ const payment = (amount = "1.90", periodNumber = 1) => ({
   refundStatus: "none",
   isFullyRefunded: false,
   periodNumber,
+  createdAt: new Date(Date.now() - 60000).toISOString(),
   amount: { display: amount, currency: "USD" },
 });
 const period = () => ({
@@ -171,7 +174,9 @@ function remote(row, plan = "single") {
       productId:
         plan === "single"
           ? env.WAFFO_SINGLE_PRODUCT_ID
-          : env.WAFFO_MONTHLY_PRODUCT_ID,
+          : plan === "monthpass"
+            ? env.WAFFO_MONTH_PASS_PRODUCT_ID
+            : env.WAFFO_MONTHLY_PRODUCT_ID,
     },
     payments: [payment()],
   };
@@ -260,6 +265,28 @@ test("Pancake webhook verifies raw signature, scope and replay window; HTTP reje
   };
   assert.equal(
     (
+      await fetch(`${base}/checkout`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ plan: "monthly" }),
+      })
+    ).status,
+    400,
+    "stale clients cannot create recurring subscriptions",
+  );
+  assert.equal(
+    (
+      await fetch(`${base}/checkout`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ plan: "monthpass" }),
+      })
+    ).status,
+    200,
+    "one-time month pass is available through the authenticated API",
+  );
+  assert.equal(
+    (
       await fetch(`${base}/consume`, {
         method: "POST",
         headers: { ...headers, origin: "https://evil.example" },
@@ -329,4 +356,100 @@ test("Pancake webhook verifies raw signature, scope and replay window; HTTP reje
   );
   await b.processEvents();
   assert.equal((await store.status("alice")).credits, 0);
+});
+
+test("one-time month pass uses a stable calendar month, including leap days and short months", () => {
+  for (const [start, end] of [
+    ["2025-01-31T12:34:56Z", "2025-02-28T12:34:56Z"],
+    ["2024-01-31T12:34:56Z", "2024-02-29T12:34:56Z"],
+    ["2024-02-29T12:34:56Z", "2024-03-29T12:34:56Z"],
+    ["2025-12-31T12:34:56Z", "2026-01-31T12:34:56Z"],
+  ]) {
+    const order = {
+      status: "completed",
+      payments: [{ ...payment("9.90"), createdAt: start }],
+    };
+    const expected = Date.parse(end);
+    assert.equal(monthPassUntil(order, Date.parse(start)), expected);
+    assert.equal(
+      monthPassUntil(order, expected + 86400000),
+      expected,
+      "reconciliation cannot extend expired access",
+    );
+    assert.equal(
+      monthPassUntil(order, Date.parse(start) - 1),
+      0,
+      "future payment cannot grant access",
+    );
+  }
+  for (const change of [
+    (o) => (o.status = "pending"),
+    (o) => (o.payments[0].amount.display = "1.90"),
+    (o) => (o.payments[0].amount.currency = "EUR"),
+    (o) => (o.payments[0].status = "failed"),
+    (o) => (o.payments[0].refundStatus = "full"),
+    (o) => (o.payments[0].refundStatus = "pending"),
+    (o) => (o.payments[0].isFullyRefunded = true),
+    (o) => (o.payments[0].createdAt = "invalid"),
+    (o) => (o.payments = []),
+  ]) {
+    const order = { status: "completed", payments: [payment("9.90")] };
+    change(order);
+    assert.equal(monthPassUntil(order), 0);
+  }
+});
+
+test("month passes use one-time checkout; reconciliation is idempotent, refunds revoke access, expiry permits repurchase", async (t) => {
+  const store = await fixture(t),
+    client = mockClient();
+  const b = createBilling(
+    {},
+    { local: true, origin: "https://example.com" },
+    env,
+    { store, client },
+  );
+  const user = { id: "alice", email: "alice@example.test" };
+  await assert.rejects(b.checkout(user, "monthly"), /Invalid plan/);
+  const first = await b.checkout(user, "monthpass");
+  assert.equal(
+    client.creates[0].params.productId,
+    env.WAFFO_MONTH_PASS_PRODUCT_ID,
+  );
+  assert.equal(client.creates[0].params.withTrial, false);
+  assert.equal(client.creates[0].params.metadata.plan, "monthpass");
+  assert.equal((await b.checkout(user, "monthpass")).orderId, first.orderId);
+  assert.equal(client.creates.length, 1);
+  const [row] = await store.query("SELECT * FROM billing_orders WHERE id=$1", [
+    first.orderId,
+  ]);
+  const order = remote(row, "monthpass");
+  order.payments = [payment("9.90")];
+  client.orders.set(row.id, order);
+  await b.reconcile(row);
+  const expiry = (await store.status(user.id)).unlimitedUntil;
+  assert.ok(expiry > Date.now());
+  assert.equal((await store.status(user.id)).hasSubscription, false);
+  await b.reconcile(row);
+  assert.equal((await store.status(user.id)).unlimitedUntil, expiry);
+  await credit(store, "single-spare");
+  for (let i = 0; i < 5; i++)
+    assert.equal(await store.consume(user.id, randomUUID()), true);
+  assert.equal((await store.status(user.id)).credits, 1);
+  await assert.rejects(b.checkout(user, "monthpass"), /still active/);
+  order.payments[0].refundStatus = "full";
+  await b.reconcile(row);
+  assert.equal((await store.status(user.id)).unlimitedUntil, 0);
+  order.payments[0].refundStatus = "none";
+  order.payments[0].createdAt = "2020-01-31T00:00:00Z";
+  await b.reconcile(row);
+  assert.ok((await store.status(user.id)).unlimitedUntil < Date.now());
+  assert.equal(
+    await store.consume(user.id, randomUUID()),
+    true,
+    "expired pass falls back to single credit",
+  );
+  assert.equal(await store.consume(user.id, randomUUID()), false);
+  const second = await b.checkout(user, "monthpass");
+  assert.notEqual(second.orderId, first.orderId);
+  assert.equal(client.creates.length, 2);
 });

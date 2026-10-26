@@ -26,7 +26,7 @@ export async function requireDownloadPayment() {
   const status = await billingAPI("status");
   if (status.credits < 1 && status.unlimitedUntil <= Date.now()) {
     const error = new Error(
-      "Choose $1.90 for one download or $9.90/month for unlimited downloads.",
+      "Choose $1.90 for one download or $9.90 for one month of unlimited downloads. No automatic renewal.",
     );
     error.code = "PAYMENT_REQUIRED";
     throw error;
