@@ -170,6 +170,7 @@ body {
 }
 .footer-badges img {
   max-width: 100%;
+  height: auto;
 }
 .skip-link {
   position: absolute;
